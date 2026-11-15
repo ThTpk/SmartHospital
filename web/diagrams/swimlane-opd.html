@@ -68,6 +68,9 @@
     <path d="M228,144 V200 Q228,208 236,208 H319" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
     <path d="M448,208 H475" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
     <path d="M540,240 V296 Q540,304 548,304 H631" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M508,240 V392 Q508,400 516,400 H631" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="384" y="346" width="116" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="496" y="356" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="end" letter-spacing="0.04em">ตรวจก่อนพบแพทย์</text>
     <path d="M680,336 V367" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
     <rect x="612" y="346" width="60" height="14" rx="2" fill="#f5f5f5"/>
     <text x="668" y="356" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="end" letter-spacing="0.04em">ส่งตรวจ</text>
@@ -142,7 +145,7 @@
     <text x="744" y="588" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ส่งผลกลับ (วนกลับ)</text>
     </svg>
     </div>
-    <div class="cards"><div class="card"><p class="eyebrow">ลำดับบริการ</p><h3><span class="dot" style="background:#2d3142"></span>6 จุดส่งต่อ = 6 คิว</h3><ul><li>ลงทะเบียน → คัดกรอง → แพทย์ → (Lab/X-ray → แพทย์) → การเงิน → ห้องยา</li><li>ผู้ป่วยที่ต้องตรวจเพิ่มจะกลับมาพบแพทย์อีกรอบ → ห้องตรวจรับภาระ 2 ครั้ง</li><li>ค่า service time และจำนวน slot (หลังปรับปรุง) แสดงใต้ชื่อแต่ละขั้น</li></ul></div><div class="card"><p class="eyebrow">ปรับปรุงแล้ว</p><h3><span class="dot" style="background:#eb6c36"></span>ห้องยา (PHA)</h3><ul><li>ก่อน: 6 slot × 6.5 นาที รองรับ 55 ราย/ชม. < ความต้องการ 61 → คิวโตไม่หยุด</li><li>หลัง: 7 slot + pre-packing 5.8 นาที → รองรับ 72 ราย/ชม., ρ ≈ 84%</li><li>ยังเป็นหน่วยที่ภาระสูงสุด จึงควรเฝ้าระวังช่วงพีค</li></ul></div><div class="card"><p class="eyebrow">หมายเหตุ</p><h3><span class="dot" style="background:#7a8399"></span>นอกแผนภาพนี้</h3><ul><li>ฉุกเฉิน / Admit / ผ่าตัด ดูแผนภาพที่ 2</li><li>ทันตกรรม กายภาพ วัคซีน ใช้เส้นทางย่อยของ OPD (ดูเมทริกซ์ในเว็บ)</li></ul></div></div>
+    <div class="cards"><div class="card"><p class="eyebrow">ลำดับบริการ</p><h3><span class="dot" style="background:#2d3142"></span>3 เส้นทางในแผนภาพนี้</h3><ul><li>ตรวจโรคทั่วไป: ลงทะเบียน → คัดกรอง → แพทย์ → การเงิน → ห้องยา</li><li>ตรวจโรค + เอกซเรย์: แพทย์ → X-ray → กลับมาพบแพทย์ครั้งที่ 2 เพื่อฟังผล → ห้องตรวจรับภาระ 2 ครั้ง</li><li>ตรวจก่อนพบแพทย์ (เส้น “ตรวจก่อนพบแพทย์”): ตรวจเลือด = คัดกรอง → Lab → แพทย์ · ตรวจสุขภาพ = คัดกรอง → Lab → X-ray → EKG → แพทย์ → การเงิน (ไม่รับยา)</li><li>ค่า service time และจำนวน slot (หลังปรับปรุง) แสดงใต้ชื่อแต่ละขั้น</li></ul></div><div class="card"><p class="eyebrow">ปรับปรุงแล้ว</p><h3><span class="dot" style="background:#eb6c36"></span>ห้องยา (PHA)</h3><ul><li>ก่อน: 6 slot × 6.5 นาที รองรับ 55 ราย/ชม. < ความต้องการ 61 → คิวโตไม่หยุด</li><li>หลัง: 7 slot + pre-packing 5.8 นาที → รองรับ 72 ราย/ชม., ρ ≈ 84%</li><li>ยังเป็นหน่วยที่ภาระสูงสุด จึงควรเฝ้าระวังช่วงพีค</li></ul></div><div class="card"><p class="eyebrow">หมายเหตุ</p><h3><span class="dot" style="background:#7a8399"></span>นอกแผนภาพนี้</h3><ul><li>ทำแผล/ฉีดยา วัคซีน ทันตกรรม กายภาพ → แผนภาพ “OPD เฉพาะทาง”</li><li>ผ่าตัดวันเดียวกลับ และ Admit จาก OPD → แผนภาพ “ผ่าตัด / Admit”</li><li>ฉุกเฉิน → แผนภาพ “ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน”</li></ul></div></div>
     <footer>SmartHospital · Swimlane · ค่า service time / slot ตรงกับค่าเริ่มต้นในแบบจำลองคิว (web/js/data.js)</footer>
   </div>
 </body>

@@ -25,6 +25,6 @@ python -m http.server 8765 --directory web
 | `web/js/layout.js` | แผนผังห้อง ทางเดิน เก้าอี้รอ และจุดให้บริการ |
 | `web/js/scene3d.js` | ฉาก 3D (three.js r147) |
 | `web/js/main.js` | ควบคุม UI |
-| `web/diagrams/*.html` | Swimlane workflow (สร้างจาก `tools/gen_swimlanes.py`) |
+| `web/diagrams/swimlane-*.html` | Swimlane workflow 4 แผ่น ครอบคลุมทั้ง 11 process: OPD, OPD เฉพาะทาง, ผ่าตัด/Admit, ฉุกเฉิน (สร้างจาก `tools/gen_swimlanes.py`) |
 | `docs/hospital-services.md` | รายการบริการ ค่าพารามิเตอร์ และเส้นทางของแต่ละ process |
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartHospital · Patient Flow Simulator</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=8">
+  <link rel="stylesheet" href="css/app.css?v=9">
 </head>
 <body>
 <div class="app">
@@ -172,6 +172,8 @@
     <div class="wrap">
       <div class="wf-tabs">
         <button class="ghost" data-wf="diagrams/swimlane-opd.html">ผู้ป่วยนอก (OPD)</button>
+        <button class="ghost" data-wf="diagrams/swimlane-opd-specialty.html">OPD เฉพาะทาง (หัตถการ · วัคซีน · ทันตกรรม · กายภาพ)</button>
+        <button class="ghost" data-wf="diagrams/swimlane-surgery-admit.html">ผ่าตัดวันเดียวกลับ / Admit จาก OPD</button>
         <button class="ghost" data-wf="diagrams/swimlane-er-ipd.html">ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน</button>
       </div>
       <iframe class="wf" id="wf" title="Swimlane workflow" src="diagrams/swimlane-opd.html"></iframe>
@@ -181,12 +183,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script src="js/data.js?v=8"></script>
-<script src="js/layout.js?v=8"></script>
-<script src="js/queue.js?v=8"></script>
-<script src="js/profile.js?v=8"></script>
-<script src="js/sim.js?v=8"></script>
-<script src="js/scene3d.js?v=8"></script>
-<script src="js/main.js?v=8"></script>
+<script src="js/data.js?v=9"></script>
+<script src="js/layout.js?v=9"></script>
+<script src="js/queue.js?v=9"></script>
+<script src="js/profile.js?v=9"></script>
+<script src="js/sim.js?v=9"></script>
+<script src="js/scene3d.js?v=9"></script>
+<script src="js/main.js?v=9"></script>
 </body>
 </html>
