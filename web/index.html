@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartHospital · Patient Flow Simulator</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=10">
+  <link rel="stylesheet" href="css/app.css?v=12">
 </head>
 <body>
 <div class="app">
@@ -51,7 +51,11 @@
         </div>
         <div class="panel kpi" id="kpi"></div>
       </div>
-      <div class="panel live" id="live"></div>
+      <div class="panel live" id="live">
+        <div class="live-head"><h4>คิวหน้าห้อง ณ ขณะนี้</h4><span class="live-sum mono" id="liveSum"></span>
+          <button class="live-min" id="liveMin" aria-expanded="true" aria-controls="liveBody" title="ย่อหน้าต่าง">–</button></div>
+        <div id="liveBody"></div>
+      </div>
       <div class="panel journey" id="journey"></div>
       <div class="legend panel">
         <span><i style="background:#7fb77e"></i>ปกติ</span><span><i style="background:#f0b44c"></i>เฝ้าระวัง (ρ≥85% / รอเกินเป้า)</span>
@@ -184,12 +188,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script src="js/data.js?v=10"></script>
-<script src="js/layout.js?v=10"></script>
-<script src="js/queue.js?v=10"></script>
-<script src="js/profile.js?v=10"></script>
-<script src="js/sim.js?v=10"></script>
-<script src="js/scene3d.js?v=10"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/data.js?v=12"></script>
+<script src="js/layout.js?v=12"></script>
+<script src="js/queue.js?v=12"></script>
+<script src="js/profile.js?v=12"></script>
+<script src="js/sim.js?v=12"></script>
+<script src="js/scene3d.js?v=12"></script>
+<script src="js/main.js?v=12"></script>
 </body>
 </html>

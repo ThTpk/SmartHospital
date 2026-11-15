@@ -122,6 +122,8 @@
     document.querySelectorAll('[data-wf]').forEach(b => b.onclick = () => { $('#wf').src = b.dataset.wf; });
 
     buildSimControls();
+    $('#liveMin').onclick = () => setLiveMin(!liveMin);
+    setLiveMin(liveMin);
     renderProcList();
     selectProcess(selected);
     buildQueueControls();
@@ -263,9 +265,22 @@
     const rows = H.STATIONS.map(s => ({ s, st: stats[s.id], a: analysis.stations[s.id] }))
       .filter(r => r.a.lambdaH > 0 || r.st.queue > 0)
       .sort((x, y) => (y.st.queue - x.st.queue) || (y.a.rho - x.a.rho));
-    $('#live').innerHTML = `<h4>คิวหน้าห้อง ณ ขณะนี้</h4><table><tr><td></td><td class="n">คิว</td><td class="n">รอนานสุด</td><td class="n">ρ</td></tr>` +
+    const waiting = rows.reduce((a, r) => a + r.st.queue, 0), top = rows[0];
+    $('#liveSum').textContent = liveMin ? `รอ ${waiting} คน${top && top.st.queue ? ' · มากสุด ' + top.s.short + ' ' + top.st.queue : ''}` : '';
+    if (liveMin) return;   // ย่ออยู่: ไม่ต้องสร้างตาราง
+    $('#liveBody').innerHTML = `<table><tr><td></td><td class="n">คิว</td><td class="n">รอนานสุด</td><td class="n">ρ</td></tr>` +
       rows.map(r => `<tr data-s="${r.s.id}"><td>${esc(r.s.short)}</td><td class="n" style="color:${r.st.queue > L.seatCount(r.s) ? 'var(--crit)' : 'inherit'}">${r.st.queue}</td><td class="n">${Math.round(r.st.oldestWait)}'</td><td class="n">${badgeRho(r.a)}</td></tr>`).join('') + '</table>';
     document.querySelectorAll('#live tr[data-s]').forEach(tr => tr.onclick = () => { view.follow(null); view.focusStation(tr.dataset.s); });
+  }
+  /* ---------- ย่อ/ขยายหน้าต่างคิวหน้าห้อง ---------- */
+  let liveMin = false;
+  try { liveMin = localStorage.getItem('smarthospital.liveMin') === '1'; } catch (e) { /* ignore */ }
+  function setLiveMin(on) {
+    liveMin = on;
+    $('#live').classList.toggle('min', on);
+    const b = $('#liveMin'); b.textContent = on ? '+' : '–'; b.title = on ? 'ขยายหน้าต่าง' : 'ย่อหน้าต่าง'; b.setAttribute('aria-expanded', String(!on));
+    try { localStorage.setItem('smarthospital.liveMin', on ? '1' : '0'); } catch (e) { /* ignore */ }
+    if (sim) updateHud(sim.stats());
   }
   const badgeRho = a => `<span class="badge ${a.status}">${pct(a.rho)}</span>`;
 
