@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartHospital · Patient Flow Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="logo">✚</span> SmartHospital <span class="eyebrow">Patient Flow</span></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-page="sim">จำลอง 3D &amp; เส้นทางบริการ</button>
+      <button class="tab" data-page="queue">วิเคราะห์คิว &amp; คอขวด</button>
+      <button class="tab" data-page="catalog">บริการ / ฝ่ายทั้งหมด</button>
+      <button class="tab" data-page="workflow">Workflow (Swimlane)</button>
+    </nav>
+    <div class="user"><a class="theory-link" href="theory.html" title="ข้อมูลที่ต้องเก็บ วิธีวิเคราะห์ และผลลัพธ์ของการวิเคราะห์คิว">📘 ทฤษฎีการวิเคราะห์คิว</a></div>
+  </header>
+
+  <!-- ===================== 1. 3D Simulation ===================== -->
+  <section class="page active" id="page-sim">
+    <aside class="side">
+      <div>
+        <p class="eyebrow">ขั้นที่ 1</p>
+        <h3>เลือกบริการที่ต้องการ</h3>
+        <div class="proc-list" id="procList"></div>
+      </div>
+      <div id="procDetail"></div>
+      <div id="stEditor" class="editor"></div>
+    </aside>
+    <div class="stage">
+      <div id="three"></div>
+      <div class="hud">
+        <div class="panel ctrl">
+          <span class="clock" id="clock">08:00</span>
+          <button class="primary" id="play">⏸ หยุด</button>
+          <label>ความเร็ว
+            <select id="speed">
+              <option value="0.25">0.25 นาที/วิ</option><option value="0.5">0.5 นาที/วิ</option><option value="1" selected>1 นาที/วิ</option>
+              <option value="2">2 นาที/วิ</option><option value="5">5 นาที/วิ</option><option value="10">10 นาที/วิ</option><option value="30">30 นาที/วิ</option>
+            </select></label>
+          <label>Load <input type="range" id="loadSim" min="0" max="2" step="0.05" value="1" style="width:110px"><b class="mono" id="loadSimV">100%</b></label>
+          <label><input type="checkbox" id="bg" checked> ผู้ป่วยอื่นในระบบ</label>
+          <button class="ghost" id="reset">↺ เริ่มใหม่</button>
+          <button class="ghost" id="overview">⌂ มุมมองรวม</button>
+        </div>
+        <div class="panel kpi" id="kpi"></div>
+      </div>
+      <div class="panel live" id="live"></div>
+      <div class="panel journey" id="journey"></div>
+      <div class="legend panel">
+        <span><i style="background:#7fb77e"></i>ปกติ</span><span><i style="background:#f0b44c"></i>เฝ้าระวัง (ρ≥85% / รอเกินเป้า)</span>
+        <span><i style="background:#e05a4f"></i>คอขวด (ρ≥100% / ล้นเก้าอี้)</span><span><i style="background:#eb6c36;border-radius:50%"></i>เส้นทาง/ผู้ป่วยที่ติดตาม</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. Queue analysis ===================== -->
+  <section class="page" id="page-queue">
+    <div class="wrap">
+      <div class="card">
+        <h2>พารามิเตอร์แบบจำลองแถวคอย</h2>
+        <p class="sub">ปรับ load, ชั่วโมงเปิดให้บริการ และเป้าหมายเวลารอ — ผลคำนวณและการจำลอง 3D อัปเดตทันที</p>
+        <div class="params">
+          <label>Load ผู้ใช้บริการ (ตัวคูณ) <input type="range" id="load" min="0" max="2" step="0.05" value="1"><b class="mono" id="loadV">100%</b></label>
+          <label>ชั่วโมงเปิดบริการ <input type="number" id="hours" min="1" max="24" step="1" value="8"></label>
+          <label>เป้าหมายเวลารอ Wq (นาที) <input type="number" id="target" min="1" max="120" step="1" value="15"></label>
+          <label>ρ สูงสุดที่ยอมรับ <input type="number" id="rhoMax" min="0.5" max="0.99" step="0.01" value="0.85"></label>
+          <label>ตั้งความแปรปรวน service time ทุกหน่วย
+            <select id="distAll"><option value="">— กำหนดรายหน่วยในตาราง —</option><option value="exp">แปรปรวนสูง (Exponential, M/M/c)</option><option value="erlang4">ปานกลาง (Erlang-4)</option><option value="det">คงที่ (Deterministic)</option></select></label>
+          <label><span><input type="checkbox" id="closeAfter"> ปิดรับผู้ป่วยหลังครบชั่วโมงเปิด</span></label>
+          <button class="ghost" id="resetCfg">คืนค่าเริ่มต้น</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="scn-head">
+          <div><h2>ผลการปรับปรุงตามคำแนะนำ</h2><p class="sub" id="scnState" style="margin:0"></p></div>
+          <div class="scn-btns">
+            <button class="ghost" data-scn="before">ก่อนปรับปรุง</button>
+            <button class="ghost" data-scn="after">หลังปรับปรุงตามคำแนะนำ</button>
+          </div>
+        </div>
+        <div id="improve"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2>คอขวดของระบบ</h2>
+          <p class="sub">Utilization ρ = λ / (c·μ) ของแต่ละหน่วย — เส้นส้ม = ρ สูงสุดที่ยอมรับ, เส้นแดง = 100% (คิวยาวไม่สิ้นสุด)</p>
+          <div id="bnCallout"></div>
+          <div class="bars" id="bars" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h2>ภาระงานตาม process (λ ราย/ชั่วโมง)</h2>
+          <p class="sub">จำนวนผู้ป่วยเข้ามาเฉลี่ยต่อชั่วโมงของแต่ละบริการ (ก่อนคูณ load) และเวลารวมโดยประมาณ</p>
+          <div class="scroll"><table class="t" id="procTable"></table></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>ผลการวิเคราะห์ M/M/c ต่อหน่วยบริการ</h2>
+        <p class="sub">กำหนดระยะเวลาให้บริการ (service time) ความแปรปรวน slot และ slot สูงสุดของแต่ละหน่วยได้ในตาราง · ถ้าเวลาให้บริการไม่ใช่ Exponential ใช้ M/G/c (Allen–Cunneen) · คอลัมน์ DES = ค่าที่วัดจริงจากการจำลอง 3D</p>
+        <div class="scroll"><table class="t" id="stTable"></table></div>
+      </div>
+
+      <div class="grid3">
+        <div class="card" style="grid-column: span 2">
+          <h2>คำแนะนำการปรับปรุง</h2>
+          <p class="sub">เพิ่ม service slot ถ้าทำได้ภายในขีดจำกัด — ถ้าทำไม่ได้ ประเมินแถวคอยสูงสุดและแนวทางลดเวลาบริการ</p>
+          <div class="row-btns" style="margin-bottom:12px"><button class="accent-btn" id="applyAll">ใช้คำแนะนำ “เพิ่ม slot” ทั้งหมด</button></div>
+          <div class="sugg" id="sugg"></div>
+        </div>
+        <div class="card">
+          <h2>สูตรที่ใช้</h2>
+          <div class="formula">
+            λ<sub>s</sub> = Σ<sub>p</sub> λ<sub>p</sub> × (จำนวนครั้งที่ p ผ่าน s)<br>
+            a = λ/μ ,  ρ = a / c<br>
+            P<sub>wait</sub> = ErlangC(c, a)<br>
+            L<sub>q</sub> = P<sub>wait</sub>·ρ/(1−ρ) ,  W<sub>q</sub> = L<sub>q</sub>/λ<br>
+            W = W<sub>q</sub> + 1/μ ,  L = λW (Little)<br>
+            P(N<sub>q</sub> ≥ n) = P<sub>wait</sub>·ρ<sup>n</sup> → คิว P95<br>
+            P(W<sub>q</sub> &gt; t) = P<sub>wait</sub>·e<sup>−(cμ−λ)t</sup> → รอ P95<br>
+            M/G/c : W<sub>q</sub> ≈ W<sub>q</sub>(M/M/c) × (1+CV²)/2<br>
+            ρ ≥ 1 : คิวสิ้นวัน ≈ (λ − cμ) × ชั่วโมงเปิด
+          </div>
+          <p class="sub" style="margin-top:10px">ถ้าหน่วยต้นทางรับไม่ไหว ผู้ป่วยที่ไหลไปหน่วยถัดไปจะถูกจำกัดที่ capacity ของต้นทาง (ระบบแสดง “ถูกบีบ” ไว้ในตาราง)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. Catalog ===================== -->
+  <section class="page" id="page-catalog">
+    <div class="wrap">
+      <div class="card">
+        <h2>บริการและฝ่ายทั้งหมดของโรงพยาบาล</h2>
+        <p class="sub">หน่วยที่มีป้าย <span class="chip q">QUEUE</span> คือหน่วยที่ถูกจำลองคิวในระบบ</p>
+      </div>
+      <div class="cat" id="catalog"></div>
+      <div class="card">
+        <h2>เมทริกซ์ process × หน่วยบริการ</h2>
+        <p class="sub">ตัวเลข = ลำดับที่ผู้ป่วยต้องไปหน่วยนั้นในแต่ละ process</p>
+        <div class="scroll"><table class="t matrix" id="matrix"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. Workflow ===================== -->
+  <section class="page" id="page-workflow">
+    <div class="wrap">
+      <div class="wf-tabs">
+        <button class="ghost" data-wf="diagrams/swimlane-opd.html">ผู้ป่วยนอก (OPD)</button>
+        <button class="ghost" data-wf="diagrams/swimlane-er-ipd.html">ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน</button>
+      </div>
+      <iframe class="wf" id="wf" title="Swimlane workflow" src="diagrams/swimlane-opd.html"></iframe>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/data.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/queue.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/scene3d.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

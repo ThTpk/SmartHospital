@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swimlane ER IPD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper:#f5f5f5; --ink:#2d3142; --muted:#4f5d75; --soft:#7a8399; --accent:#eb6c36; --rule:rgba(45,49,66,0.12);
+      --sans:'Geist','Noto Sans Thai',system-ui,sans-serif; --serif:'Instrument Serif','Noto Serif Thai',serif; --mono:'Geist Mono','Noto Sans Thai',ui-monospace,monospace; }
+    body { font-family: var(--sans); background: var(--paper); color: var(--ink); padding: 2.5rem 1.5rem; }
+    .frame { max-width: 1180px; margin: 0 auto; }
+    .eyebrow { font-family: var(--mono); font-size: .66rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+    h1 { font-family: var(--serif); font-size: clamp(1.5rem, 2.4vw + .75rem, 2rem); font-weight: 400; letter-spacing: -.01em; line-height: 1.3; margin-bottom: .4rem; }
+    .lede { color: var(--muted); margin-bottom: 1.5rem; max-width: 70ch; }
+    .scroll { overflow-x: auto; }
+    svg { width: 100%; min-width: 960px; display: block; }
+    .cards { display: grid; grid-template-columns: 1.1fr 1fr .9fr; gap: 16px; margin-top: 1.5rem; }
+    .card { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; }
+    .card .eyebrow { font-size: .6rem; }
+    .card h3 { font-size: 1rem; margin: .2rem 0 .5rem; display: flex; gap: 8px; align-items: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .card ul { padding-left: 1.1rem; color: var(--muted); font-size: .9rem; line-height: 1.7; }
+    .aside { font-family: var(--serif); font-style: italic; color: var(--muted); }
+    footer { margin-top: 2rem; padding-top: .8rem; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: .7rem; color: var(--soft); }
+    @media (max-width: 800px) { .cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Swimlane · ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน</p>
+    <h1>เส้นทางผู้ป่วยฉุกเฉิน: คัดแยก รักษา ผ่าตัด และรับไว้นอนโรงพยาบาล</h1>
+    <p class="lede">แพทย์ ER เป็นจุดตัดสินใจหลัก — ส่งตรวจ ส่งผ่าตัด หรือรับไว้เป็นผู้ป่วยใน ทุกเส้นทางมาจบที่การจำหน่ายผู้ป่วย</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1104 608" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="swimlane-er-ipd-title swimlane-er-ipd-desc">
+    <title id="swimlane-er-ipd-title">เส้นทางผู้ป่วยฉุกเฉิน: คัดแยก รักษา ผ่าตัด และรับไว้นอนโรงพยาบาล</title>
+    <desc id="swimlane-er-ipd-desc">Swimlane ห้าแถวแสดงผู้ป่วยฉุกเฉินผ่านการคัดแยก แพทย์ ER ส่งตรวจ Lab/X-ray แล้วแยกไปผ่าตัดและพักฟื้น หรือรับไว้ในหอผู้ป่วย ก่อนจำหน่าย ชำระเงิน รับยา และกลับบ้าน</desc>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+    <!-- lanes -->
+    <text x="24" y="104" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">PATIENT</text>
+    <text x="24" y="122" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ผู้ป่วย / ญาติ</text>
+    <line x1="16" y1="64" x2="1088" y2="64" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <rect x="16" y="160" width="1072" height="96" fill="rgba(45,49,66,0.025)"/>
+    <text x="24" y="200" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">EMERGENCY</text>
+    <text x="24" y="218" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ห้องฉุกเฉิน</text>
+    <line x1="16" y1="160" x2="1088" y2="160" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <text x="24" y="296" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">DIAGNOSTICS</text>
+    <text x="24" y="314" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ตรวจวินิจฉัย</text>
+    <line x1="16" y1="256" x2="1088" y2="256" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <rect x="16" y="352" width="1072" height="96" fill="rgba(45,49,66,0.025)"/>
+    <text x="24" y="392" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">SURGERY</text>
+    <text x="24" y="410" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ผ่าตัด</text>
+    <line x1="16" y1="352" x2="1088" y2="352" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <text x="24" y="488" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">INPATIENT · BILLING</text>
+    <text x="24" y="506" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ผู้ป่วยใน</text>
+    <text x="24" y="522" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">& การเงิน</text>
+    <line x1="16" y1="448" x2="1088" y2="448" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <line x1="16" y1="544" x2="1088" y2="544" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <line x1="144" y1="64" x2="144" y2="544" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <!-- arrows (drawn before nodes) -->
+    <path d="M228,144 V175" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M292,208 H319" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M368,240 V271" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="300" y="250" width="60" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="356" y="260" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="end" letter-spacing="0.04em">ส่งตรวจ</text>
+    <path d="M400,272 V241" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+    <rect x="408" y="250" width="52" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="412" y="260" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="start" letter-spacing="0.04em">ผลตรวจ</text>
+    <path d="M448,220 H532 Q540,220 540,228 V367" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="548" y="294" width="80" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="552" y="304" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="start" letter-spacing="0.04em">ต้องผ่าตัด</text>
+    <path d="M448,196 H866 Q874,196 874,204 V463" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="656" y="174" width="88" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="700" y="184" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.04em">รับไว้รักษา</text>
+    <path d="M604,400 H631" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M760,400 H822 Q830,400 830,408 V463" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M916,496 H943" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <path d="M1008,464 V145" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="1016" y="294" width="60" height="14" rx="2" fill="#f5f5f5"/>
+    <text x="1020" y="304" fill="#7a8399" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="start" letter-spacing="0.04em">จำหน่าย</text>
+    <!-- nodes -->
+    <rect x="164" y="80" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="164" y="80" width="128" height="64" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="228" y="116" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">มาถึงประตูฉุกเฉิน</text>
+    <text x="228" y="136" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">ER ENTRANCE · 24/7</text>
+    <rect x="164" y="176" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="164" y="176" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="172" y="182" width="28" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="186" y="191" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">ERT</text>
+    <text x="228" y="212" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">คัดแยกความรุนแรง</text>
+    <text x="228" y="232" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">ESI 1-5 · 4 min</text>
+    <rect x="320" y="176" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="320" y="176" width="128" height="64" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <rect x="328" y="182" width="20" height="12" rx="2" fill="transparent" stroke="#eb6c36" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="338" y="191" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">ER</text>
+    <text x="384" y="206" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">แพทย์ ER</text>
+    <text x="384" y="220" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ประเมิน / รักษา</text>
+    <text x="384" y="232" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">25 min · c=5</text>
+    <rect x="320" y="272" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="320" y="272" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="328" y="278" width="28" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="342" y="287" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">LAB</text>
+    <text x="384" y="308" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">Lab · X-ray</text>
+    <text x="384" y="328" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">5 / 10 min</text>
+    <rect x="476" y="368" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="476" y="368" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="484" y="374" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="494" y="383" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">OR</text>
+    <text x="540" y="404" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ห้องผ่าตัด</text>
+    <text x="540" y="424" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">90 min · c=3</text>
+    <rect x="632" y="368" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="632" y="368" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="640" y="374" width="32" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="656" y="383" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">PACU</text>
+    <text x="696" y="404" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ห้องพักฟื้น</text>
+    <text x="696" y="424" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">60 min · c=4</text>
+    <rect x="788" y="464" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="788" y="464" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="796" y="470" width="28" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="810" y="479" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">ADM</text>
+    <text x="852" y="494" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">Admit</text>
+    <text x="852" y="508" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">รับเข้าหอผู้ป่วย</text>
+    <text x="852" y="520" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">15 + 30 min</text>
+    <rect x="944" y="464" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="944" y="464" width="128" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="952" y="470" width="28" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="966" y="479" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">CSH</text>
+    <text x="1008" y="494" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">จำหน่าย</text>
+    <text x="1008" y="508" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ชำระเงิน · รับยา</text>
+    <text x="1008" y="520" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">CSH · PHA</text>
+    <rect x="944" y="80" width="128" height="64" rx="6" fill="#f5f5f5"/>
+    <rect x="944" y="80" width="128" height="64" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="1008" y="116" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">กลับบ้าน</text>
+    <text x="1008" y="136" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">EXIT</text>
+    <!-- legend -->
+    <line x1="32" y1="568" x2="1072" y2="568" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <text x="32" y="588" fill="#4f5d75" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="112" y="578" width="20" height="12" rx="2" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="140" y="588" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">จุดเริ่ม / สิ้นสุด</text>
+    <rect x="312" y="578" width="20" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="340" y="588" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ขั้นตอนบริการ (มีคิว)</text>
+    <rect x="512" y="578" width="20" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="540" y="588" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">จุดตัดสินใจหลัก</text>
+    <line x1="712" y1="584" x2="736" y2="584" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <text x="744" y="588" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ส่งผลกลับ (วนกลับ)</text>
+    </svg>
+    </div>
+    <div class="cards"><div class="card"><p class="eyebrow">ลำดับบริการ</p><h3><span class="dot" style="background:#2d3142"></span>สามทางเลือกหลังพบแพทย์ ER</h3><ul><li>รักษาแล้วจำหน่าย → การเงิน/ยา (process ER ในแบบจำลอง)</li><li>ผ่าตัด → พักฟื้น → Admit</li><li>รับไว้รักษาโดยตรง → Admit → หอผู้ป่วย</li></ul></div><div class="card"><p class="eyebrow">จุดตัดสินใจ</p><h3><span class="dot" style="background:#eb6c36"></span>แพทย์ ER</h3><ul><li>ผู้ป่วย ER ผ่านห้องฉุกเฉิน 2 ครั้ง → เพิ่มเป็น 5 ทีม ρ 83% → 67%</li><li>Lab/X-ray ใช้ร่วมกับ OPD → คิว X-ray ของ OPD ส่งผลต่อ ER</li><li>แนะนำ: แยกคิว ER ออกจาก OPD และ fast track ESI 4-5</li></ul></div><div class="card"><p class="eyebrow">หมายเหตุ</p><h3><span class="dot" style="background:#7a8399"></span>ระยะเวลานอนโรงพยาบาล</h3><ul><li>แบบจำลองคิวนับถึงการรับเข้าหอ (ไม่รวมวันนอน)</li><li>ICU / ห้องคลอด อยู่นอกขอบเขตการจำลอง</li></ul></div></div>
+    <footer>SmartHospital · Swimlane · ค่า service time / slot ตรงกับค่าเริ่มต้นในแบบจำลองคิว (web/js/data.js)</footer>
+  </div>
+</body>
+</html>

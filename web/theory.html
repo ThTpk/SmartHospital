@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ทฤษฎีการวิเคราะห์คิว</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper:#f5f5f5; --ink:#2d3142; --muted:#4f5d75; --soft:#7a8399; --accent:#eb6c36; --link:#2e5aa8; --rule:rgba(45,49,66,0.12);
+      --sans:'Geist','Noto Sans Thai',system-ui,sans-serif; --serif:'Instrument Serif','Noto Serif Thai',serif; --mono:'Geist Mono','Noto Sans Thai',ui-monospace,monospace; }
+    body { font-family: var(--sans); background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 15px; }
+    .top { position: sticky; top: 0; z-index: 5; background: rgba(245,245,245,.94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); }
+    .top .in { max-width: 1180px; margin: 0 auto; padding: 10px 24px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+    .top a { color: var(--muted); text-decoration: none; } .top a:hover { color: var(--accent); }
+    .top .back { font-weight: 600; color: var(--ink); margin-right: auto; }
+    .frame { max-width: 1180px; margin: 0 auto; padding: 2.5rem 24px 4rem; }
+    .eyebrow { font-family: var(--mono); font-size: .66rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+    h1 { font-family: var(--serif); font-size: clamp(1.7rem, 2.6vw + .8rem, 2.4rem); font-weight: 400; line-height: 1.3; margin-bottom: .6rem; }
+    h2 { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; margin: 3rem 0 .4rem; line-height: 1.35; }
+    h2 .n { font-family: var(--mono); font-size: .8rem; color: var(--accent); vertical-align: middle; margin-right: .5rem; letter-spacing: .1em; }
+    .lede { color: var(--muted); max-width: 75ch; }
+    p + p { margin-top: .6rem; }
+    .scroll { overflow-x: auto; margin-top: 1.25rem; }
+    svg { width: 100%; min-width: 960px; display: block; }
+    .cards { display: grid; grid-template-columns: 1.15fr 1fr .85fr; gap: 16px; margin-top: 1.25rem; }
+    .card { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; }
+    .card h3 { font-size: 1rem; margin-bottom: .4rem; display: flex; gap: 8px; align-items: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .card ul, .card ol { padding-left: 1.2rem; color: var(--muted); font-size: .92rem; }
+    .kendall { font-family: var(--mono); font-size: 1.1rem; background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: .8rem 1rem; display: inline-block; margin: .6rem 0; }
+    .tw { overflow-x: auto; margin-top: 1rem; background: #fff; border: 1px solid var(--rule); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th { text-align: left; font-weight: 600; color: var(--muted); font-size: .8rem; padding: .6rem .8rem; border-bottom: 1px solid var(--rule); background: #fafafa; white-space: nowrap; }
+    td { padding: .55rem .8rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    table.per td:nth-child(3), table.per td:nth-child(4), table.per td:nth-child(5) { color: var(--link); white-space: nowrap; }
+    table.qs td:first-child { font-weight: 600; }
+    table.qs a { font-family: var(--mono); font-size: .8rem; color: var(--accent); text-decoration: none; margin-right: 4px; }
+    .mono { font-family: var(--mono); font-size: .88em; }
+    .ans { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-top: 1rem; }
+    .an { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.1rem; scroll-margin-top: 70px; }
+    .an header { display: flex; gap: 10px; align-items: baseline; margin-bottom: .4rem; }
+    .an .k { color: var(--accent); font-weight: 600; }
+    .an h3 { font-size: 1rem; }
+    .an p { font-size: .9rem; color: var(--muted); }
+    .an .f { font-family: var(--mono); font-size: .82rem; background: var(--paper); border-radius: 4px; padding: .45rem .6rem; color: var(--ink); }
+    .an .o b { color: var(--ink); }
+    .aside { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 1.05rem; border-left: 2px solid var(--accent); padding-left: 1rem; margin: 1rem 0; max-width: 75ch; }
+    .ex { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 1rem; }
+    .ex div { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: .7rem .9rem; font-size: .82rem; color: var(--muted); }
+    .ex b { display: block; font-family: var(--mono); font-size: 1.1rem; color: var(--ink); }
+    .ex .hl { border-color: var(--accent); }
+    ul.cav { padding-left: 1.2rem; color: var(--muted); max-width: 85ch; }
+    ul.cav li { margin: .3rem 0; }
+    ul.cav b { color: var(--ink); }
+    footer { margin-top: 3rem; padding-top: .8rem; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: .7rem; color: var(--soft); }
+    @media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="top"><div class="in">
+    <a class="back" href="index.html">← กลับหน้าหลัก SmartHospital</a>
+    <a href="#s1">พื้นฐาน</a><a href="#s2">ตัวอย่าง service</a><a href="#s3">ข้อมูลที่ต้องเก็บ</a><a href="#s4">ขั้นตอนวิเคราะห์</a><a href="#s5">การวิเคราะห์แต่ละแบบ</a><a href="#s6">ผลลัพธ์ที่ได้</a><a href="#s7">ข้อควรระวัง</a>
+  </div></nav>
+  <div class="frame">
+    <p class="eyebrow">Theory · Workflow &amp; Queue analysis</p>
+    <h1>ทฤษฎีการวิเคราะห์ workflow และแถวคอย<br>ต้องเก็บข้อมูลอะไร นำไปวิเคราะห์อย่างไร และได้คำตอบอะไร</h1>
+    <p class="lede">ใช้ได้กับทุกระบบที่มีผู้รับบริการมารอรับบริการ เช่น โรงพยาบาล ธนาคาร ศูนย์บริการ ร้านอาหาร หรือ call center ตัวอย่างในหน้านี้ใช้ค่าจริงจากแบบจำลองโรงพยาบาลของระบบนี้</p>
+
+    <h2 id="s1"><span class="n">01</span>พื้นฐาน: workflow กับ queue</h2>
+    <p><b>Workflow analysis</b> ตอบว่าผู้รับบริการเดินผ่านหน่วยใดบ้าง เรียงลำดับอย่างไร และมีจุดส่งต่อกี่จุด <b>Queue analysis</b> ตอบว่าในแต่ละหน่วยผู้รับบริการต้องรอนานเท่าไร เพราะอะไร และต้องปรับอะไร ทุกจุดส่งต่อใน workflow คือคิวใหม่หนึ่งคิว ดังนั้นต้องวิเคราะห์ทั้งสองอย่างร่วมกัน</p>
+    <p>แถวคอยหนึ่งหน่วยอธิบายด้วยสัญลักษณ์ของ Kendall</p>
+    <div class="kendall">A / S / c / K / N / D</div>
+    <div class="cards">
+      <div class="card"><p class="eyebrow">ความหมาย</p><h3><span class="dot" style="background:var(--ink)"></span>สัญลักษณ์ Kendall</h3>
+        <ul><li><b>A</b> รูปแบบการมาถึง (M = Poisson, G = ทั่วไป)</li><li><b>S</b> การกระจายของเวลาให้บริการ (M = exponential, D = คงที่, G = ทั่วไป)</li><li><b>c</b> จำนวนช่องบริการ (service slot)</li><li><b>K</b> ความจุของคิว · <b>N</b> ขนาดประชากร · <b>D</b> กฎการเรียก (FIFO, priority)</li></ul></div>
+      <div class="card"><p class="eyebrow">พารามิเตอร์หลัก</p><h3><span class="dot" style="background:var(--accent)"></span>3 ค่าที่ต้องรู้</h3>
+        <ul><li><b>λ</b> อัตรามาถึง (ราย/ชม.)</li><li><b>μ</b> อัตราให้บริการต่อ slot = 1 ÷ เวลาให้บริการเฉลี่ย</li><li><b>c</b> จำนวน slot ที่เปิดจริง</li><li>ได้ <b>ρ = λ ÷ (c·μ)</b> ซึ่งต้องน้อยกว่า 1</li></ul></div>
+      <div class="card"><p class="eyebrow">กฎที่ใช้ได้เสมอ</p><h3><span class="dot" style="background:var(--link)"></span>Little's law</h3>
+        <ul><li><b>L = λ · W</b></li><li>จำนวนคนในระบบ = อัตรามาถึง × เวลาที่อยู่ในระบบ</li><li>ใช้ได้โดยไม่ต้องสมมติการกระจาย จึงใช้ตรวจข้อมูลจริงได้</li></ul></div>
+    </div>
+
+    <h2 id="s2"><span class="n">02</span>ตัวอย่าง service: ห้องจ่ายยา</h2>
+    <p>ผู้ป่วยจากหลายหน่วยไหลมารวมกันที่ห้องจ่ายยา จึงเป็นหน่วยที่มีภาระสูงสุดในโรงพยาบาลนี้ วงกลมสีน้ำเงิน ①–④ คือจุดที่ต้องบันทึกเวลาของผู้ป่วยทุกราย</p>
+    <div class="scroll"><svg viewBox="0 0 1104 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svc-title svc-desc">
+    <title id="svc-title">ตัวอย่าง service: ห้องจ่ายยาและจุดเก็บข้อมูลคิว</title>
+    <desc id="svc-desc">ผู้ป่วยจาก OPD ทันตกรรม/ผ่าตัด และ ER รวม 61 รายต่อชั่วโมงเข้าคิวหน้าห้องจ่ายยาที่มี 7 ช่องบริการ โดยระบุจุดบันทึกเวลามาถึง เริ่มบริการ เสร็จบริการ และออกจากคิวก่อนได้รับบริการ</desc>
+    <defs>
+      <marker id="svc-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="svc-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="svc-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+    <text x="32" y="44" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">SOURCES · λ รวม 61 / hr</text>
+    <path d="M192,92 H224 Q232,92 232,100 V148 Q232,156 240,156 H271" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#svc-arrow)"/>
+    <path d="M192,180 H271" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#svc-arrow)"/>
+    <path d="M192,268 H224 Q232,268 232,260 V212 Q232,204 240,204 H271" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#svc-arrow)"/>
+    <path d="M512,180 H575" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#svc-arrow-accent)"/>
+    <path d="M776,180 H863" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#svc-arrow)"/>
+    <path d="M392,232 V312 Q392,320 400,320 H575" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#svc-arrow)"/>
+    <rect x="516" y="152" width="56" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="544" y="166" fill="#7a8399" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">เรียกคิว</text>
+    <rect x="784" y="152" width="72" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="820" y="166" fill="#7a8399" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">จ่ายยาเสร็จ</text>
+    <rect x="446" y="292" width="84" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="488" y="306" fill="#7a8399" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">รอนานเกินไป</text>
+    <rect x="32" y="64" width="160" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="32" y="64" width="160" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="112" y="90" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ห้องตรวจแพทย์ OPD</text>
+    <text x="112" y="108" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">λ = 52 / hr</text>
+    <rect x="32" y="152" width="160" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="32" y="152" width="160" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="112" y="178" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ทันตกรรม · ผ่าตัด</text>
+    <text x="112" y="196" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">λ = 5 / hr</text>
+    <rect x="32" y="240" width="160" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="32" y="240" width="160" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="112" y="266" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ห้องฉุกเฉิน ER</text>
+    <text x="112" y="284" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">λ = 4 / hr</text>
+    <rect x="272" y="128" width="240" height="104" rx="6" fill="#f5f5f5"/>
+    <rect x="272" y="128" width="240" height="104" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <rect x="280" y="134" width="40" height="12" rx="2" fill="transparent" stroke="#4f5d75" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="300" y="143" fill="#4f5d75" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">QUEUE</text>
+    <text x="392" y="164" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">คิวรอหน้าห้องยา</text>
+    <rect x="304" y="176" width="24" height="24" rx="4" fill="rgba(79,93,117,0.35)" stroke="#4f5d75" stroke-width="0.8"/>
+    <rect x="340" y="176" width="24" height="24" rx="4" fill="rgba(79,93,117,0.35)" stroke="#4f5d75" stroke-width="0.8"/>
+    <rect x="376" y="176" width="24" height="24" rx="4" fill="rgba(79,93,117,0.35)" stroke="#4f5d75" stroke-width="0.8"/>
+    <rect x="412" y="176" width="24" height="24" rx="4" fill="#ffffff" stroke="#4f5d75" stroke-width="0.8"/>
+    <rect x="448" y="176" width="24" height="24" rx="4" fill="#ffffff" stroke="#4f5d75" stroke-width="0.8"/>
+    <text x="392" y="220" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">Lq ≈ 3.1 · P95 = 15 · FIFO</text>
+    <rect x="576" y="128" width="200" height="104" rx="6" fill="#f5f5f5"/>
+    <rect x="576" y="128" width="200" height="104" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <rect x="584" y="134" width="52" height="12" rx="2" fill="transparent" stroke="#eb6c36" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="610" y="143" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">SERVICE</text>
+    <text x="676" y="168" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ห้องจ่ายยา</text>
+    <text x="676" y="186" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">c = 7 slot · S = 5.8 min</text>
+    <text x="676" y="200" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">μ = 10.3 / hr / slot</text>
+    <text x="676" y="214" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">ρ = 84%</text>
+    <rect x="864" y="152" width="200" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="864" y="152" width="200" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="964" y="178" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">รับยาแล้ว · กลับบ้าน</text>
+    <text x="964" y="196" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">W ≈ 8.8 min</text>
+    <rect x="576" y="292" width="200" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="576" y="292" width="200" height="56" rx="6" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.45)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="676" y="318" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ออกก่อนได้รับบริการ</text>
+    <text x="676" y="336" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">reneging / LWBS</text>
+    <circle cx="272" cy="128" r="10" fill="#2e5aa8" stroke="#f5f5f5" stroke-width="2"/>
+    <text x="272" y="132" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">1</text>
+    <rect x="242" y="94" width="60" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="272" y="108" fill="#2e5aa8" font-size="12" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">t_arrive</text>
+    <circle cx="576" cy="128" r="10" fill="#2e5aa8" stroke="#f5f5f5" stroke-width="2"/>
+    <text x="576" y="132" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">2</text>
+    <rect x="549" y="94" width="54" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="576" y="108" fill="#2e5aa8" font-size="12" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">t_start</text>
+    <circle cx="776" cy="128" r="10" fill="#2e5aa8" stroke="#f5f5f5" stroke-width="2"/>
+    <text x="776" y="132" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">3</text>
+    <rect x="755" y="94" width="42" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="776" y="108" fill="#2e5aa8" font-size="12" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">t_end</text>
+    <circle cx="776" cy="292" r="10" fill="#2e5aa8" stroke="#f5f5f5" stroke-width="2"/>
+    <text x="776" y="296" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">4</text>
+    <rect x="749" y="258" width="54" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="776" y="272" fill="#2e5aa8" font-size="12" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">t_leave</text>
+    <line x1="32" y1="372" x2="1072" y2="372" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <text x="32" y="392" fill="#4f5d75" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="112" y="382" width="20" height="12" rx="2" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+    <text x="144" y="392" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ต้นทาง / ปลายทาง</text>
+    <rect x="288" y="382" width="20" height="12" rx="2" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="320" y="392" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">คิวรอ</text>
+    <rect x="464" y="382" width="20" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="496" y="392" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">หน่วยบริการที่วิเคราะห์</text>
+    <circle cx="650" cy="388" r="7" fill="#2e5aa8"/>
+    <text x="672" y="392" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">จุดบันทึกเวลา</text>
+    <line x1="816" y1="388" x2="840" y2="388" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <text x="848" y="392" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ออกจากคิว</text>
+    </svg></div>
+    <div class="ex">
+      <div>λ อัตรามาถึง<b>61 ราย/ชม.</b></div><div>S เวลาจ่ายยาเฉลี่ย<b>5.8 นาที</b></div><div>c ช่องจ่ายยา<b>7 ช่อง</b></div>
+      <div class="hl">ρ = 61 ÷ (7 × 10.3)<b>84%</b></div><div>P(ต้องรอ) Erlang-C<b>58%</b></div><div>Lq คิวเฉลี่ย<b>3.1 คน</b></div><div>Wq รอเฉลี่ย<b>3.0 นาที</b></div><div>คิว P95<b>15 คน</b></div>
+    </div>
+    <p class="aside">เวลา 4 จุดนี้เพียงพอสำหรับคำนวณทุกค่าในหน้านี้: ① ใช้หา λ, ② − ① คือเวลารอ, ③ − ② คือเวลาให้บริการ และ ④ บอกว่ามีผู้ป่วยกี่คนที่รอไม่ไหว</p>
+
+    <h2 id="s3"><span class="n">03</span>ข้อมูลที่ต้องเก็บ</h2>
+    <p><b>ข้อมูลพื้นฐานที่ทุก service ต้องเก็บ</b> แบ่งเป็นข้อมูลต่อผู้ป่วยหนึ่งราย (event log) และข้อมูลของหน่วยบริการ</p>
+    <div class="tw"><table class=""><thead><tr><th>ข้อมูล</th><th>ความหมาย / วิธีเก็บ</th><th>นำไปใช้ทำอะไร</th><th>ความถี่</th></tr></thead><tbody><tr><td><span class="mono">case_id / visit_id</span></td><td>รหัสการมารับบริการ (แปลง HN เป็นรหัสนิรนามตาม PDPA)</td><td>เชื่อมทุกเหตุการณ์ของผู้ป่วยคนเดียวกันเป็นเส้นทาง</td><td>ทุกครั้ง</td></tr><tr><td>process / ประเภทผู้ป่วย</td><td>OPD, ER, ตรวจสุขภาพ, นัด/walk-in</td><td>แยก λ ตามกลุ่ม หา routing ของแต่ละ process</td><td>ทุกครั้ง</td></tr><tr><td>station</td><td>หน่วยบริการที่เกิดเหตุการณ์</td><td>รวมข้อมูลเป็นรายหน่วย</td><td>ทุกครั้ง</td></tr><tr><td><span class="mono">① t_arrive</span></td><td>เวลามาถึงคิว (กดบัตร / ส่งแฟ้ม / e-order ถึง)</td><td>อัตรามาถึง λ, inter-arrival, เวลารอ</td><td>ทุกครั้ง</td></tr><tr><td><span class="mono">② t_start</span></td><td>เวลาที่ถูกเรียกหรือเริ่มให้บริการ</td><td>เวลารอ Wq = ② − ①</td><td>ทุกครั้ง</td></tr><tr><td><span class="mono">③ t_end</span></td><td>เวลาเสร็จบริการ</td><td>service time S = ③ − ②, utilization</td><td>ทุกครั้ง</td></tr><tr><td><span class="mono">④ t_leave</span></td><td>เวลาที่ออกจากคิวก่อนได้รับบริการ (ถ้ามี)</td><td>อัตราละทิ้งคิว (reneging / LWBS)</td><td>ถ้าเกิด</td></tr><tr><td><span class="mono">server_id</span></td><td>เคาน์เตอร์ / ห้อง / เตียง / ผู้ให้บริการ</td><td>นับ slot ที่ใช้จริง และความต่างระหว่างผู้ให้บริการ</td><td>ทุกครั้ง</td></tr><tr><td>priority</td><td>ระดับความเร่งด่วน เช่น ESI 1–5, ผู้สูงอายุ</td><td>แยกคิวตามลำดับความสำคัญ</td><td>ถ้ามี</td></tr><tr><td>จำนวน slot ที่เปิดรายชั่วโมง (c)</td><td>จากตารางเวรหรือ log การเปิด-ปิดช่องบริการ</td><td>capacity จริง c(t)</td><td>ทุกวัน</td></tr><tr><td>ขีดจำกัด slot / จำนวนเก้าอี้รอ</td><td>พื้นที่ อุปกรณ์ บุคลากรสูงสุด</td><td>ตัดสินว่าแก้ด้วยการเพิ่ม slot ได้หรือไม่</td><td>ครั้งเดียว</td></tr><tr><td>เวลาเปิด-ปิดบริการ</td><td>ช่วงเวลาที่รับผู้ป่วย</td><td>ประเมินคิวสะสมสิ้นวันเมื่อ ρ ≥ 1</td><td>ครั้งเดียว</td></tr></tbody></table></div>
+    <p style="margin-top:1.5rem"><b>ข้อมูลเฉพาะของแต่ละ service ในโรงพยาบาล</b> ระบุว่าเหตุการณ์ใดถือเป็น ①②③ ของแต่ละหน่วย และต้องเก็บอะไรเพิ่ม</p>
+    <div class="tw"><table class="per"><thead><tr><th>Service</th><th>รหัส</th><th>① มาถึง</th><th>② เริ่มบริการ</th><th>③ เสร็จ</th><th>ข้อมูลเพิ่มเติมเฉพาะหน่วย</th><th>แหล่งข้อมูล</th></tr></thead><tbody><tr><td>ลงทะเบียน / เวชระเบียน</td><td><span class="mono">REG</span></td><td>กดบัตรคิว</td><td>เรียกเข้าเคาน์เตอร์</td><td>พิมพ์ใบนำทาง</td><td>ผู้ป่วยใหม่/เก่า, สิทธิการรักษา, นัด/walk-in</td><td>ตู้กดบัตรคิว, HIS</td></tr><tr><td>คัดกรอง / ซักประวัติ</td><td><span class="mono">TRI</span></td><td>แฟ้มถึงจุดคัดกรอง</td><td>เรียกชื่อ</td><td>บันทึก vital sign เสร็จ</td><td>จำนวนจุดคัดกรอง, ระดับความเร่งด่วน</td><td>HIS (nurse note)</td></tr><tr><td>ห้องตรวจแพทย์</td><td><span class="mono">DOC</span></td><td>เข้าคิวแพทย์</td><td>แพทย์เปิด visit</td><td>ปิด visit / สั่ง order</td><td>คลินิก, แพทย์, เวลาเริ่มออกตรวจจริง, รอบแรก/รอบฟังผล, no-show</td><td>EMR, ระบบนัด</td></tr><tr><td>Lab / จุดเจาะเลือด</td><td><span class="mono">LAB</span></td><td>order ถึงจุดเจาะ</td><td>เริ่มเจาะ</td><td>เจาะเสร็จ</td><td>ชนิดการตรวจ, เวลาผลออก (turnaround time)</td><td>LIS, barcode</td></tr><tr><td>รังสีวิทยา</td><td><span class="mono">XRY</span></td><td>ลงทะเบียนที่รังสี</td><td>เข้าห้องถ่ายภาพ</td><td>ถ่ายเสร็จ</td><td>modality, เคส ER แทรกคิว, เวลารายงานผล</td><td>RIS / PACS</td></tr><tr><td>EKG</td><td><span class="mono">EKG</span></td><td>ถึงห้อง EKG</td><td>เริ่มตรวจ</td><td>ตรวจเสร็จ</td><td>จำนวนเครื่อง, เจ้าหน้าที่</td><td>HIS</td></tr><tr><td>หัตถการ / วัคซีน</td><td><span class="mono">PRC</span></td><td>ถึงห้องหัตถการ</td><td>เริ่มทำ</td><td>ทำเสร็จ</td><td>ชนิดหัตถการ (เวลาต่างกันมาก ควรแยกกลุ่ม)</td><td>HIS</td></tr><tr><td>ER Triage / ห้องฉุกเฉิน</td><td><span class="mono">ERT · ER</span></td><td>มาถึงประตู (door)</td><td>คัดแยกเสร็จ / พบแพทย์</td><td>จำหน่าย / admit</td><td>ESI 1–5, ทางมา (EMS/walk-in), กลับก่อนพบแพทย์ (LWBS)</td><td>ER log, HIS</td></tr><tr><td>ทันตกรรม / กายภาพ</td><td><span class="mono">DEN · PT</span></td><td>check-in</td><td>เริ่มทำ</td><td>ทำเสร็จ</td><td>นัด vs walk-in, ชนิดงาน, จำนวนยูนิต/เตียง</td><td>ระบบนัด</td></tr><tr><td>เตรียมผ่าตัด / OR / PACU</td><td><span class="mono">ANE · OR · PACU</span></td><td>ถึงห้องผ่าตัด</td><td>เริ่มผ่าตัด</td><td>ออกจากห้อง</td><td>เวลาที่จอง vs จริง, turnover, ยกเลิกเคส, เวลาเข้า/ออก PACU</td><td>OR management</td></tr><tr><td>Admit / หอผู้ป่วย</td><td><span class="mono">ADM · WARD</span></td><td>ขอเตียง</td><td>ได้เตียง</td><td>ผู้ป่วยถึงหอ</td><td>เตียงว่างรายชั่วโมง, LOS, เวลาจำหน่าย</td><td>ADT / bed board</td></tr><tr><td>การเงิน</td><td><span class="mono">CSH</span></td><td>ค่าใช้จ่ายถึงการเงิน</td><td>เรียกคิว</td><td>ชำระเสร็จ</td><td>สิทธิ (จ่ายเอง/เบิกได้), วิธีชำระ</td><td>HIS billing</td></tr><tr><td>ห้องจ่ายยา</td><td><span class="mono">PHA</span></td><td>ใบสั่งยาถึงห้องยา</td><td>เรียกรับยา</td><td>จ่ายยาเสร็จ</td><td>จำนวนรายการยา, ยาเดิม/ยาใหม่, เวลาจัดยา vs ให้คำแนะนำ</td><td>HIS pharmacy, จอเรียกคิว</td></tr></tbody></table></div>
+
+    <h2 id="s4"><span class="n">04</span>นำข้อมูลมาทำอะไร: ขั้นตอนการวิเคราะห์คิว</h2>
+    <p>ข้อมูลจากข้อ 03 ผ่าน 6 ขั้นตอนก่อนกลายเป็นคำแนะนำ ถ้าขั้นตรวจสอบพบว่าผลแบบจำลองไม่ตรงกับข้อมูลจริง ต้องย้อนกลับไปปรับค่าพารามิเตอร์</p>
+    <div class="scroll"><svg viewBox="0 0 1104 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="pipe-title pipe-desc">
+    <title id="pipe-title">ขั้นตอนนำข้อมูลมาวิเคราะห์คิว</title>
+    <desc id="pipe-desc">กระบวนการ 6 ขั้นจากการเก็บเวลาในแต่ละหน่วย เตรียมข้อมูล ประมาณค่า λ μ c สร้างแบบจำลองคิว ตรวจสอบกับข้อมูลจริง และทดลอง what-if เพื่อหาคอขวดและจำนวน slot โดยแต่ละขั้นระบุข้อมูลเข้า วิธีวิเคราะห์ และผลที่ได้</desc>
+    <defs>
+      <marker id="pipe-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="pipe-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="pipe-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+    <text x="20" y="152" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">INPUT</text>
+    <text x="20" y="172" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ข้อมูลเข้า</text>
+    <rect x="16" y="232" width="1072" height="136" fill="rgba(45,49,66,0.025)"/>
+    <text x="20" y="256" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">METHOD</text>
+    <text x="20" y="276" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">วิธีวิเคราะห์</text>
+    <text x="20" y="392" fill="#7a8399" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">OUTPUT</text>
+    <text x="20" y="412" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif">ผลที่ได้</text>
+    <path d="M256,84 H275" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#pipe-arrow)"/>
+    <path d="M420,84 H439" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#pipe-arrow)"/>
+    <path d="M584,84 H603" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#pipe-arrow-accent)"/>
+    <path d="M748,84 H767" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#pipe-arrow)"/>
+    <path d="M912,84 H931" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#pipe-arrow)"/>
+    <path d="M840,56 V40 Q840,32 832,32 H520 Q512,32 512,40 V55" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#pipe-arrow)"/>
+    <rect x="610" y="10" width="132" height="18" rx="2" fill="#f5f5f5"/>
+    <text x="676" y="24" fill="#7a8399" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ปรับเทียบพารามิเตอร์</text>
+    <rect x="112" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="112" y="56" width="144" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="120" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="130" y="71" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">01</text>
+    <text x="184" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">เก็บข้อมูล</text>
+    <text x="184" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">COLLECT</text>
+    <rect x="112" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="112" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="124" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ตู้กดบัตรคิว / HIS</text>
+    <text x="124" y="178" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ระบบคิวเรียกชื่อ</text>
+    <text x="124" y="196" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ตารางเวรเจ้าหน้าที่</text>
+    <rect x="112" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="112" y="240" width="144" height="120" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="124" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">บันทึกเวลา ①–④</text>
+    <text x="124" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ทุกผู้ป่วย ทุกหน่วย</text>
+    <text x="124" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ต่อเนื่อง 2–4 สัปดาห์</text>
+    <text x="124" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">แยกวัน / ชั่วโมง</text>
+    <rect x="112" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="112" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="124" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Event log</text>
+    <text x="124" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">case · station</text>
+    <text x="124" y="436" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">t_arrive … t_end</text>
+    <rect x="276" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="276" y="56" width="144" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="284" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="294" y="71" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">02</text>
+    <text x="348" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">เตรียมข้อมูล</text>
+    <text x="348" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">CLEAN</text>
+    <rect x="276" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="276" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="288" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Event log ดิบ</text>
+    <rect x="276" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="276" y="240" width="144" height="120" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="288" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ลบค่าซ้ำ / ผิดปกติ</text>
+    <text x="288" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Wq = ② − ①</text>
+    <text x="288" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">S = ③ − ②</text>
+    <text x="288" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เรียงเส้นทางผู้ป่วย</text>
+    <text x="288" y="336" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">(process mining)</text>
+    <rect x="276" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="276" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="288" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ตารางเวลารอ</text>
+    <text x="288" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">และเวลาบริการ</text>
+    <text x="288" y="436" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เส้นทาง + ความถี่</text>
+    <rect x="440" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="440" y="56" width="144" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="448" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="458" y="71" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">03</text>
+    <text x="512" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ประมาณค่า</text>
+    <text x="512" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">ESTIMATE</text>
+    <rect x="440" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="440" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="452" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ตารางเวลารอ/บริการ</text>
+    <text x="452" y="178" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เส้นทางผู้ป่วย</text>
+    <rect x="440" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="440" y="240" width="144" height="120" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="452" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">λ = มาถึง ÷ ชั่วโมง</text>
+    <text x="452" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">μ = 1 ÷ S เฉลี่ย</text>
+    <text x="452" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">CV² = Var(S) ÷ S̄²</text>
+    <text x="452" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">c = slot ที่เปิดจริง</text>
+    <text x="452" y="336" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">visit ratio ต่อหน่วย</text>
+    <rect x="440" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="440" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="452" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">λ, μ, c, CV²</text>
+    <text x="452" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">รายหน่วย รายชั่วโมง</text>
+    <rect x="604" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="604" y="56" width="144" height="56" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <rect x="612" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#eb6c36" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="622" y="71" fill="#eb6c36" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">04</text>
+    <text x="676" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">สร้างแบบจำลอง</text>
+    <text x="676" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">MODEL</text>
+    <rect x="604" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="604" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="616" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">λ, μ, c, CV²</text>
+    <text x="616" y="178" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เส้นทาง (routing)</text>
+    <rect x="604" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="604" y="240" width="144" height="120" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="616" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ρ = λ ÷ cμ</text>
+    <text x="616" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Erlang-C → P(รอ)</text>
+    <text x="616" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Lq, Wq (M/M/c)</text>
+    <text x="616" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">M/G/c, Jackson net</text>
+    <text x="616" y="336" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">หรือ DES</text>
+    <rect x="604" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="604" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="616" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ρ, Wq, Lq, P95</text>
+    <text x="616" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ต่อหน่วย / process</text>
+    <rect x="768" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="768" y="56" width="144" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="776" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="786" y="71" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">05</text>
+    <text x="840" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ตรวจสอบ</text>
+    <text x="840" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">VALIDATE</text>
+    <rect x="768" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="768" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="780" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ผลแบบจำลอง</text>
+    <text x="780" y="178" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">Wq ที่วัดได้จริง</text>
+    <rect x="768" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="768" y="240" width="144" height="120" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="780" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เทียบ Wq จริง</text>
+    <text x="780" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">กับแบบจำลอง</text>
+    <text x="780" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ตรวจ L = λW</text>
+    <text x="780" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">คลาดเคลื่อน < 15%</text>
+    <rect x="768" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="768" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="780" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">แบบจำลองที่</text>
+    <text x="780" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เชื่อถือได้</text>
+    <rect x="932" y="56" width="144" height="56" rx="6" fill="#f5f5f5"/>
+    <rect x="932" y="56" width="144" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <rect x="940" y="62" width="20" height="12" rx="2" fill="transparent" stroke="#2d3142" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="950" y="71" fill="#2d3142" fill-opacity="0.8" font-size="7" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle" letter-spacing="0.08em">06</text>
+    <text x="1004" y="88" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist','Noto Sans Thai',sans-serif" text-anchor="middle">ทดลอง what-if</text>
+    <text x="1004" y="106" fill="#4f5d75" font-size="9" font-family="'Geist Mono','Noto Sans Thai',monospace" text-anchor="middle">DECIDE</text>
+    <rect x="932" y="136" width="144" height="88" rx="6" fill="#f5f5f5"/>
+    <rect x="932" y="136" width="144" height="88" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="944" y="160" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">แบบจำลองที่</text>
+    <text x="944" y="178" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ผ่านการตรวจ</text>
+    <rect x="932" y="240" width="144" height="120" rx="6" fill="#f5f5f5"/>
+    <rect x="932" y="240" width="144" height="120" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="944" y="264" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">หา c ขั้นต่ำ</text>
+    <text x="944" y="282" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ลด S หรือ CV²</text>
+    <text x="944" y="300" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">กระจายนัด (ลด λ)</text>
+    <text x="944" y="318" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ประเมินคิวสูงสุด</text>
+    <rect x="932" y="376" width="144" height="72" rx="6" fill="#f5f5f5"/>
+    <rect x="932" y="376" width="144" height="72" rx="6" fill="#ffffff" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+    <text x="944" y="400" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">คอขวด, slot, เวร</text>
+    <text x="944" y="418" fill="#2d3142" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">เก้าอี้รอ, เป้าเวลา</text>
+    <line x1="32" y1="492" x2="1072" y2="492" stroke="rgba(45,49,66,0.12)" stroke-width="0.8"/>
+    <text x="32" y="512" fill="#4f5d75" font-size="8" font-family="'Geist Mono','Noto Sans Thai',monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="112" y="502" width="20" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="144" y="512" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">ขั้นตอนวิเคราะห์</text>
+    <rect x="288" y="502" width="20" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="320" y="512" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">หัวใจของการวิเคราะห์คิว</text>
+    <line x1="464" y1="508" x2="488" y2="508" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <text x="496" y="512" fill="#4f5d75" font-size="12" font-family="'Geist','Noto Sans Thai',sans-serif">วนกลับเพื่อปรับเทียบ</text>
+    </svg></div>
+
+    <h2 id="s5"><span class="n">05</span>การวิเคราะห์แต่ละแบบทำอย่างไร</h2>
+    <p>แต่ละการวิเคราะห์ระบุวิธีทำ สูตร และผลที่ได้ ส่วนรหัส A1–A12 ใช้อ้างอิงในตารางผลลัพธ์ข้อ 06</p>
+    <div class="ans">
+      <article class="an" id="A1">
+        <header><span class="k mono">A1</span><h3>ค้นหา workflow จริง (Process mining)</h3></header>
+        <p>นำ event log มาจัดกลุ่มตาม case_id เรียงตามเวลา จะได้ลำดับหน่วยที่ผู้ป่วยแต่ละคนผ่าน นับรูปแบบเส้นทาง (variant) ที่พบบ่อย แล้วคำนวณความน่าจะเป็นที่ผู้ป่วยไปต่อจากหน่วย i ไปหน่วย j</p>
+        <p class="f">p<sub>ij</sub> = จำนวนครั้ง i→j ÷ จำนวนครั้งที่ออกจาก i</p>
+        <p class="o"><b>ผลที่ได้:</b> แผนผัง workflow (เช่น swimlane), เส้นทางของแต่ละ process, จำนวนครั้งที่ผู้ป่วยกลับมาหน่วยเดิม (เช่น พบแพทย์รอบฟังผล)</p>
+      </article>
+      <article class="an" id="A2">
+        <header><span class="k mono">A2</span><h3>วิเคราะห์การมาถึง (Arrival)</h3></header>
+        <p>นับจำนวน ① ในแต่ละชั่วโมงของแต่ละหน่วย หาค่าเฉลี่ยรายชั่วโมงของแต่ละวันในสัปดาห์ แล้วตรวจว่าการมาถึงเป็นแบบสุ่ม (Poisson) หรือไม่ จากระยะห่างระหว่างผู้มาถึง</p>
+        <p class="f">λ = จำนวนผู้มาถึง ÷ ชั่วโมง ; ถ้า SD ของ inter-arrival ≈ ค่าเฉลี่ย (CV ≈ 1) → Poisson</p>
+        <p class="o"><b>ผลที่ได้:</b> λ(t) รายชั่วโมง, ชั่วโมงพีค, ความผันผวนรายวัน</p>
+      </article>
+      <article class="an" id="A3">
+        <header><span class="k mono">A3</span><h3>วิเคราะห์เวลาให้บริการ (Service time)</h3></header>
+        <p>คำนวณ S = ③ − ② ของทุกราย หาค่าเฉลี่ย ส่วนเบี่ยงเบนมาตรฐาน และเปอร์เซ็นไทล์ แยกตามประเภทงานหรือผู้ให้บริการ เพื่อดูว่าความแปรปรวนมาจากไหน</p>
+        <p class="f">μ = 1 ÷ S̄ ; CV² = Var(S) ÷ S̄²</p>
+        <p class="o"><b>ผลที่ได้:</b> service time เฉลี่ย, ความแปรปรวน (เลือกแบบจำลอง M/M/c หรือ M/G/c), หน่วยที่เวลาไม่สม่ำเสมอ</p>
+      </article>
+      <article class="an" id="A4">
+        <header><span class="k mono">A4</span><h3>ความสามารถรองรับและ utilization</h3></header>
+        <p>เทียบภาระที่เข้ามากับความสามารถของหน่วย ถ้า ρ ≥ 1 แปลว่ารับไม่ไหว คิวจะยาวขึ้นเรื่อย ๆ หน่วยที่ ρ สูงที่สุดคือคอขวด</p>
+        <p class="f">capacity = c × 60 ÷ S̄ (ราย/ชม.) ; ρ = λ ÷ (c·μ)</p>
+        <p class="o"><b>ผลที่ได้:</b> คอขวดของระบบ, หน่วยที่ใช้ทรัพยากรน้อยเกินไป (ρ < 50%)</p>
+      </article>
+      <article class="an" id="A5">
+        <header><span class="k mono">A5</span><h3>เวลารอและความยาวคิว (M/M/c)</h3></header>
+        <p>ใช้สูตร Erlang-C หาความน่าจะเป็นที่ผู้ป่วยต้องรอ แล้วคำนวณความยาวคิวและเวลารอเฉลี่ย ถ้าเวลาให้บริการไม่ใช่ exponential ให้คูณด้วย (1 + CV²) / 2</p>
+        <p class="f">L<sub>q</sub> = P<sub>wait</sub>·ρ/(1−ρ) ; W<sub>q</sub> = L<sub>q</sub>/λ ; W = W<sub>q</sub> + S̄</p>
+        <p class="o"><b>ผลที่ได้:</b> เวลารอเฉลี่ย, จำนวนคนรอเฉลี่ย, เวลาอยู่ในหน่วยทั้งหมด</p>
+      </article>
+      <article class="an" id="A6">
+        <header><span class="k mono">A6</span><h3>ค่าสูงสุดที่ควรเตรียมรับ (percentile)</h3></header>
+        <p>ค่าเฉลี่ยไม่พอสำหรับวางแผนพื้นที่ จึงหาค่าที่ 95% ของเวลาจะไม่เกิน ใช้กำหนดจำนวนเก้าอี้รอและเป้าเวลารอ</p>
+        <p class="f">P(N<sub>q</sub> ≥ n) = P<sub>wait</sub>·ρ<sup>n</sup> ; P(W<sub>q</sub> > t) = P<sub>wait</sub>·e<sup>−(cμ−λ)t</sup></p>
+        <p class="o"><b>ผลที่ได้:</b> คิวสูงสุด (P95), เวลารอสูงสุด (P95), จำนวนเก้าอี้ ≈ คิว P95 × 1.5 (รวมญาติ)</p>
+      </article>
+      <article class="an" id="A7">
+        <header><span class="k mono">A7</span><h3>โครงข่ายคิวและเวลารวมของแต่ละ process</h3></header>
+        <p>แต่ละหน่วยรับผู้ป่วยจากหลาย process รวมกัน จึงต้องคำนวณ λ ของแต่ละหน่วยจากเส้นทาง แล้วรวมเวลาของทุกหน่วยตามเส้นทาง ถ้าหน่วยต้นทางรับไม่ไหว หน่วยปลายทางจะได้รับผู้ป่วยน้อยลง</p>
+        <p class="f">λ<sub>j</sub> = λ<sub>0j</sub> + Σ<sub>i</sub> λ<sub>i</sub>·p<sub>ij</sub> ; เวลารวม = Σ W ตามเส้นทาง</p>
+        <p class="o"><b>ผลที่ได้:</b> เวลาที่ผู้ป่วยแต่ละ process อยู่ในโรงพยาบาล, process ที่สร้างภาระให้คอขวดมากที่สุด</p>
+      </article>
+      <article class="an" id="A8">
+        <header><span class="k mono">A8</span><h3>สภาวะล้นระบบ (ρ ≥ 1)</h3></header>
+        <p>สูตรสภาวะคงตัวใช้ไม่ได้เมื่อ ρ ≥ 1 จึงใช้การประมาณแบบของไหล (fluid) คิวจะเพิ่มขึ้นในอัตราที่ผู้มาเกินกำลังบริการตลอดช่วงเปิดให้บริการ</p>
+        <p class="f">คิว ณ เวลา T ≈ (λ − cμ) × T ; รอของคนสุดท้าย ≈ คิว ÷ (cμ)</p>
+        <p class="o"><b>ผลที่ได้:</b> แถวคอยสูงสุดเมื่อแก้ไขไม่ได้, เวลาที่ต้องเปิดบริการเกินเวลา</p>
+      </article>
+      <article class="an" id="A9">
+        <header><span class="k mono">A9</span><h3>หาจำนวน slot และทางเลือกปรับปรุง (what-if)</h3></header>
+        <p>ทดลองเพิ่ม c ทีละ 1 จนกว่า W<sub>q</sub> ≤ เป้าหมาย และ ρ ≤ 85% ถ้าเกินขีดจำกัดพื้นที่ ให้หา service time ที่ต้องลดลง หรือจำนวนผู้ป่วยที่ต้องย้ายไปช่วงอื่น</p>
+        <p class="f">c ขั้นต่ำ ; กฎรากที่สอง c ≈ a + β√a (a = λ/μ) ; λ<sub>max</sub> = 0.85·c·μ</p>
+        <p class="o"><b>ผลที่ได้:</b> จำนวน slot ที่ต้องเปิด, เป้าลดเวลาให้บริการ, จำนวนนัดที่ต้องกระจาย</p>
+      </article>
+      <article class="an" id="A10">
+        <header><span class="k mono">A10</span><h3>แบ่งช่วงเวลา (time-varying / SIPP)</h3></header>
+        <p>ผู้ป่วยมาไม่เท่ากันทั้งวัน จึงแบ่งวันเป็นช่วงละ 1 ชั่วโมง ใช้ λ(t) และ c(t) ของแต่ละช่วงคำนวณแยกกัน แล้วจัดเวรให้ตรงกับช่วงพีค</p>
+        <p class="f">คำนวณ M/M/c แยกทุกช่วง t ด้วย λ(t), c(t)</p>
+        <p class="o"><b>ผลที่ได้:</b> ตารางเวรรายชั่วโมง, ชั่วโมงที่ต้องเปิดช่องเพิ่ม</p>
+      </article>
+      <article class="an" id="A11">
+        <header><span class="k mono">A11</span><h3>ตรวจสอบแบบจำลอง (Validation)</h3></header>
+        <p>เทียบ W<sub>q</sub> ที่วัดได้จริง (② − ①) กับค่าจากแบบจำลอง และตรวจ Little's law จากข้อมูลจริง ถ้าต่างกันมาก ให้กลับไปตรวจข้อมูลหรือสมมติฐาน เช่น มีผู้ป่วยแซงคิวหรือเปิดช่องไม่ครบ</p>
+        <p class="f">L = λ·W ; ความคลาดเคลื่อน = |W<sub>q</sub> จริง − W<sub>q</sub> แบบจำลอง| ÷ W<sub>q</sub> จริง</p>
+        <p class="o"><b>ผลที่ได้:</b> ความเชื่อมั่นว่าแบบจำลองใช้ทำนายได้</p>
+      </article>
+      <article class="an" id="A12">
+        <header><span class="k mono">A12</span><h3>จำลองเหตุการณ์ไม่ต่อเนื่อง (DES)</h3></header>
+        <p>เมื่อระบบมีเงื่อนไขที่สูตรรองรับไม่ได้ เช่น คิวตามลำดับความสำคัญ ผู้ป่วยละทิ้งคิว หรือเปลี่ยนจำนวน slot ระหว่างวัน ให้จำลองผู้ป่วยทีละรายด้วยตัวเลขสุ่ม แล้ววัดผลแบบเดียวกับข้อมูลจริง</p>
+        <p class="f">สุ่ม inter-arrival ~ Exp(λ), S ~ การกระจายที่วัดได้ แล้ววัดผลซ้ำหลายรอบ</p>
+        <p class="o"><b>ผลที่ได้:</b> ผลที่สมจริงขึ้นและภาพเคลื่อนไหว (แท็บจำลอง 3D ของระบบนี้)</p>
+      </article></div>
+
+    <h2 id="s6"><span class="n">06</span>ผลลัพธ์ที่การวิเคราะห์คิวหาคำตอบให้ได้</h2>
+    <div class="tw"><table class="qs"><thead><tr><th>คำถามที่การวิเคราะห์ตอบได้</th><th>การวิเคราะห์</th><th>วิธีหาคำตอบ</th><th>ตัวอย่างจากระบบนี้</th></tr></thead><tbody><tr><td>หน่วยไหนเป็นคอขวด</td><td><a href="#A4">A4</a></td><td>หน่วยที่ ρ สูงสุด หรือ ρ ≥ 1</td><td>ก่อนปรับ: ห้องยา ρ 110% (รับได้ 55 ราย/ชม. แต่มี 61 ราย/ชม.)</td></tr><tr><td>ผู้ป่วยต้องรอนานแค่ไหน (เฉลี่ยและกรณีแย่)</td><td><a href="#A5">A5</a> <a href="#A6">A6</a></td><td>W<sub>q</sub> เฉลี่ย และ W<sub>q</sub> P95</td><td>ห้องยาหลังปรับ: เฉลี่ย 3 นาที, 95% รอไม่เกิน 13 นาที</td></tr><tr><td>คิวยาวที่สุดกี่คน ต้องมีเก้าอี้กี่ตัว</td><td><a href="#A6">A6</a></td><td>คิว P95 × 1.5</td><td>ห้องยา: คิว P95 = 15 คน → เก้าอี้ ≈ 23 ตัว</td></tr><tr><td>ต้องเปิดกี่ช่องบริการ</td><td><a href="#A9">A9</a> <a href="#A10">A10</a></td><td>c ขั้นต่ำที่ทำให้ W<sub>q</sub> ≤ เป้า และ ρ ≤ 85%</td><td>X-ray: 3 → 4 เครื่อง (รอ 24 → 3 นาที)</td></tr><tr><td>ถ้าเพิ่ม slot ไม่ได้ ต้องลดเวลาให้บริการเท่าไร</td><td><a href="#A9">A9</a></td><td>หา S ที่ผ่านเป้าด้วย c สูงสุด</td><td>ห้องยา: 6.5 → 5.8 นาที (−11%) ร่วมกับ 7 ช่อง</td></tr><tr><td>รับผู้ป่วยได้สูงสุดกี่รายต่อชั่วโมง</td><td><a href="#A4">A4</a> <a href="#A9">A9</a></td><td>λ<sub>max</sub> = ρ<sub>max</sub> × c × μ</td><td>ห้องยา 7 ช่อง: ≈ 61.6 ราย/ชม. ที่ ρ 85%</td></tr><tr><td>ถ้าไม่แก้ไข คิวสิ้นวันเท่าไร</td><td><a href="#A8">A8</a></td><td>(λ − cμ) × ชั่วโมงเปิด</td><td>ห้องยาก่อนปรับ: +5.6 คน/ชม. → ≈ 45 คนเมื่อครบ 8 ชม.</td></tr><tr><td>ผู้ป่วยแต่ละ process อยู่ในโรงพยาบาลนานเท่าไร</td><td><a href="#A7">A7</a></td><td>Σ W ตามเส้นทาง</td><td>ตรวจโรค + เอกซเรย์: 1 ชม. 29 นาที → 58 นาที</td></tr><tr><td>การลดความแปรปรวนช่วยได้แค่ไหน</td><td><a href="#A3">A3</a> <a href="#A5">A5</a></td><td>W<sub>q</sub> × (1 + CV²)/2</td><td>ห้องยา: เวลาจ่ายยาคงที่ (CV² = 0) รอ 3.0 → 1.5 นาที</td></tr><tr><td>ช่วงเวลาไหนต้องเพิ่มเจ้าหน้าที่</td><td><a href="#A2">A2</a> <a href="#A10">A10</a></td><td>ρ(t) รายชั่วโมง</td><td>ใช้ λ รายชั่วโมงจากข้อมูลจริง (ระบบนี้ใช้ค่าเฉลี่ยทั้งวัน)</td></tr><tr><td>หน่วยไหนมีทรัพยากรเกินจำเป็น</td><td><a href="#A4">A4</a></td><td>ρ < 50% ต่อเนื่อง</td><td>PACU ρ 25% → ย้ายพยาบาลไปช่วยหน่วยอื่นได้</td></tr><tr><td>แบบจำลองเชื่อถือได้หรือไม่</td><td><a href="#A11">A11</a></td><td>เทียบ W<sub>q</sub> จริงกับแบบจำลอง</td><td>ระบบนี้เทียบสูตรกับ DES ในคอลัมน์ DES ของตาราง</td></tr></tbody></table></div>
+
+    <h2 id="s7"><span class="n">07</span>ข้อควรระวังและสมมติฐาน</h2>
+    <ul class="cav"><li><b>ภาระเปลี่ยนตามเวลา</b> — ค่าเฉลี่ยทั้งวันซ่อนชั่วโมงพีค ควรวิเคราะห์รายชั่วโมง (A10)</li><li><b>การมาถึงไม่สุ่ม</b> — ผู้ป่วยนัดมาตรงเวลา ทำให้ CV ของการมาถึงต่ำกว่า 1 และสูตร Poisson จะประเมินเวลารอสูงเกินจริง</li><li><b>ลำดับความสำคัญ</b> — ER ใช้ ESI ไม่ใช่มาก่อนได้ก่อน ควรแยกคิวตามระดับหรือใช้ DES</li><li><b>ละทิ้งคิว / กลับก่อน</b> — ถ้ามีผู้ป่วยกลับก่อนมาก เวลารอที่วัดได้จะต่ำกว่าความต้องการจริง ต้องเก็บ ④</li><li><b>ข้อมูลไม่ครบ</b> — timestamp ที่บันทึกย้อนหลังหรือกดพร้อมกันหลายราย ทำให้ S ผิด ต้องตรวจในขั้นเตรียมข้อมูล</li><li><b>ขนาดตัวอย่าง</b> — ควรมีอย่างน้อย 100–200 รายต่อหน่วยต่อช่วงเวลา และเก็บ 2–4 สัปดาห์ให้ครอบคลุมทุกวันในสัปดาห์</li><li><b>ความเป็นส่วนตัว</b> — แปลง HN เป็นรหัสนิรนามก่อนวิเคราะห์ และเก็บเฉพาะข้อมูลที่จำเป็นตาม PDPA</li></ul>
+
+    <footer>SmartHospital · Theory · ตัวเลขตัวอย่างมาจากแบบจำลองค่าเริ่มต้น (web/js/data.js) · สร้างจาก tools/gen_theory.py</footer>
+  </div>
+</body>
+</html>
