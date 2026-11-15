@@ -57,10 +57,11 @@
 
   /**
    * วิเคราะห์ทั้งโครงข่าย
-   * cfg = { stations:{id:{svc,c,max}}, processes:{id:{lambda}}, load: ตัวคูณภาระ, hours, targetWq }
+   * cfg = { stations:{id:{svc,c,max}}, processes:{id:{lambda}}, load: ตัวคูณภาระ, timeFactor: ตัวคูณรายชั่วโมง, hours, targetWq }
    */
   function analyze(H, cfg) {
-    const load = cfg.load ?? 1;
+    // timeFactor = ตัวคูณของช่วงเวลาที่วิเคราะห์ (1 = ค่าเฉลี่ยทั้งวัน, >1 = ชั่วโมงเร่งด่วน)
+    const load = (cfg.load ?? 1) * (cfg.timeFactor ?? 1);
     const hours = cfg.hours ?? 8;
     const st = {};
     H.STATIONS.forEach(s => { st[s.id] = { offered: 0, visits: [] }; });

@@ -3,7 +3,7 @@
  * ===================================================================== */
 (function () {
   'use strict';
-  const H = window.HOSP, L = window.LAYOUT, Q = window.QUEUE;
+  const H = window.HOSP, L = window.LAYOUT, Q = window.QUEUE, P = window.PROFILE;
   const $ = s => document.querySelector(s);
   const CFG_KEY = 'smarthospital.cfg.v2';
   const stName = id => H.STATIONS.find(s => s.id === id).name;
@@ -27,9 +27,11 @@
 
   /* ---------- config ---------- */
   function defaults() {
-    const c = { stations: {}, processes: {}, load: 1, hours: 8, targetWq: 15, rhoMax: 0.85, closeAfter: false };
+    const c = { stations: {}, processes: {}, load: 1, hours: 8, targetWq: 15, rhoMax: 0.85, closeAfter: false,
+      profile: P.fromPreset('normal'), analysisAt: 'avg' };
     H.STATIONS.forEach(s => c.stations[s.id] = { svc: s.svc, c: s.c, max: s.max, dist: s.dist || 'exp' });
     H.PROCESSES.forEach(p => c.processes[p.id] = { lambda: p.lambda });
+    P.apply(c);
     return c;
   }
   function loadCfg() {
@@ -39,7 +41,13 @@
       if (s) {
         Object.keys(d.stations).forEach(k => Object.assign(d.stations[k], s.stations?.[k] || {}));
         Object.keys(d.processes).forEach(k => Object.assign(d.processes[k], s.processes?.[k] || {}));
-        ['load', 'hours', 'targetWq', 'rhoMax', 'closeAfter'].forEach(k => { if (s[k] !== undefined) d[k] = s[k]; });
+        ['load', 'hours', 'targetWq', 'rhoMax', 'closeAfter', 'analysisAt'].forEach(k => { if (s[k] !== undefined) d[k] = s[k]; });
+        const sp = s.profile;
+        if (sp && Array.isArray(sp.hourly) && sp.hourly.length && sp.mix) {
+          d.profile = { id: 'custom', mix: Object.assign({}, d.profile.mix, sp.mix), hourly: sp.hourly.map(v => Math.max(0, +v || 0)) };
+          d.profile.id = P.matchPreset(d.profile);
+        } else P.resize(d.profile, d.hours);
+        P.apply(d);
       }
     } catch (e) { /* ignore */ }
     return d;
@@ -71,7 +79,21 @@
   let cfg, sim, view, analysis, suggestions;
   let selected = 'OPD', playing = true, speed = 1, tracked = null, followCam = true;
 
+  /** ชั่วโมงที่เลือกวิเคราะห์ (null = ค่าเฉลี่ยทั้งวัน) */
+  function analysisHour() {
+    const a = cfg.analysisAt, n = cfg.profile.hourly.length;
+    if (a === 'peak') return P.peakHour(cfg.profile);
+    if (typeof a === 'string' && a[0] === 'h') { const h = +a.slice(1); if (h >= 0 && h < n) return h; }
+    return null;
+  }
+  function analysisLabel() {
+    const h = analysisHour();
+    return h === null ? 'ค่าเฉลี่ยทั้งวัน' : `ช่วง ${P.hourLabel(h)}–${P.hourLabel(h + 1)}${cfg.analysisAt === 'peak' ? ' (ชั่วโมงเร่งด่วน)' : ''}`;
+  }
   function recompute() {
+    P.apply(cfg);
+    const h = analysisHour();
+    cfg.timeFactor = h === null ? 1 : P.factorAt(cfg.profile, h);
     analysis = Q.analyze(H, cfg);
     suggestions = Q.suggest(H, cfg, analysis);
     saveCfg();
@@ -99,6 +121,7 @@
     renderProcList();
     selectProcess(selected);
     buildQueueControls();
+    renderProfile();
     renderQueue();
     renderCatalog();
     renderEditor();
@@ -125,6 +148,7 @@
     const ls = $('#loadSim'); ls.value = cfg.load; $('#loadSimV').textContent = pct(cfg.load);
     ls.oninput = () => setLoad(+ls.value);
     $('#bg').onchange = e => sim.setBackground(e.target.checked);
+    $('#profSim').onchange = e => { if (e.target.value !== 'custom') selectPreset(e.target.value); };
     $('#reset').onclick = () => { sim.reset(Math.floor(Math.random() * 1e6)); sim.setBackground($('#bg').checked); tracked = null; renderProcDetail(); $('#journey').classList.remove('show'); };
     $('#overview').onclick = () => { view.follow(null); view.overview(); };
   }
@@ -133,7 +157,7 @@
     cfg.load = v;
     $('#loadSim').value = v; $('#loadSimV').textContent = pct(v);
     $('#load').value = v; $('#loadV').textContent = pct(v);
-    recompute(); sim.ratesChanged(); renderQueue(); renderProcList(); renderProcDetail();
+    recompute(); sim.ratesChanged(); renderQueue(); renderProcList(); renderProcDetail(); updateProfileDerived();
   }
 
   function renderProcList() {
@@ -225,7 +249,10 @@
     const avg = recent.length ? recent.reduce((a, d) => a + (d.tOut - d.tIn), 0) / recent.length : 0;
     const totalQ = Object.values(stats).reduce((a, s) => a + s.queue, 0);
     const open = sim.arrivalsOpen() ? '' : ' · <b style="color:var(--crit)">ปิดรับผู้ป่วยแล้ว</b>';
-    $('#kpi').innerHTML = `ในระบบ <b>${sim.patients.size}</b> · รอคิว <b>${totalQ}</b> · เสร็จแล้ว <b>${sim.done.length}</b> · เวลาเฉลี่ย/ราย <b>${fmtMin(avg)}</b>${open}`;
+    const hNow = Math.floor((sim.time % 1440) / 60);
+    const rateNow = sim.arrivalsOpen() && sim.background ? H.PROCESSES.reduce((a, p) => a + sim.rateOf(p.id), 0) * 60 : 0;
+    const inHours = hNow < cfg.profile.hourly.length;
+    $('#kpi').innerHTML = `ในระบบ <b>${sim.patients.size}</b> · รอคิว <b>${totalQ}</b> · เสร็จแล้ว <b>${sim.done.length}</b> · เวลาเฉลี่ย/ราย <b>${fmtMin(avg)}</b> · มาตอนนี้ <b>${Math.round(rateNow)}</b> ราย/ชม.${inHours ? '' : ' (นอกเวลา: ใช้ค่าเฉลี่ย)'}${open}`;
     const rows = H.STATIONS.map(s => ({ s, st: stats[s.id], a: analysis.stations[s.id] }))
       .filter(r => r.a.lambdaH > 0 || r.st.queue > 0)
       .sort((x, y) => (y.st.queue - x.st.queue) || (y.a.rho - x.a.rho));
@@ -240,7 +267,12 @@
     $('#load').value = cfg.load; $('#loadV').textContent = pct(cfg.load);
     $('#load').oninput = e => setLoad(+e.target.value);
     $('#hours').value = cfg.hours; $('#target').value = cfg.targetWq; $('#rhoMax').value = cfg.rhoMax; $('#closeAfter').checked = cfg.closeAfter;
-    $('#hours').onchange = e => { cfg.hours = Math.max(1, +e.target.value || 8); changed(); };
+    $('#hours').onchange = e => {
+      const n = Math.min(24, Math.max(1, Math.round(+e.target.value || 8)));
+      P.resize(cfg.profile, n); cfg.profile.id = P.matchPreset(cfg.profile);
+      profileChanged();
+    };
+    $('#analysisAt').onchange = e => { cfg.analysisAt = e.target.value; changed(); };
     $('#target').onchange = e => { cfg.targetWq = Math.max(1, +e.target.value || 15); changed(); };
     $('#rhoMax').onchange = e => { cfg.rhoMax = Math.min(0.99, Math.max(0.5, +e.target.value || 0.85)); changed(); };
     $('#distAll').onchange = e => { if (!e.target.value) return; H.STATIONS.forEach(s => cfg.stations[s.id].dist = e.target.value); e.target.value = ''; changed(); };
@@ -249,7 +281,7 @@
     $('#resetCfg').onclick = () => {
       const d = defaults(); Object.assign(cfg, d);
       H.STATIONS.forEach(s => sim.setServers(s.id, cfg.stations[s.id].c));
-      buildQueueControls(); setLoad(1); renderEditor();
+      buildQueueControls(); setLoad(1); renderEditor(); renderProfile();
     };
     $('#applyAll').onclick = () => {
       suggestions.filter(s => s.kind === 'add').forEach(s => { cfg.stations[s.id].c = s.newC; sim.setServers(s.id, s.newC); });
@@ -257,7 +289,8 @@
     };
   }
 
-  function changed() { recompute(); sim.ratesChanged(); renderQueue(); renderProcList(); renderProcDetail(); renderEditor(); }
+  function changed() { recompute(); sim.ratesChanged(); renderQueue(); renderProcList(); renderProcDetail(); renderEditor(); updateProfileDerived(); }
+  function profileChanged() { $('#hours').value = cfg.profile.hourly.length; renderProfile(); changed(); }
 
   function setSvc(id, v) { cfg.stations[id].svc = Math.max(0.5, Math.round((+v || 1) * 10) / 10); changed(); }
   function setSlots(id, n) {
@@ -327,11 +360,11 @@
     }).join('');
 
     // process table
-    $('#procTable').innerHTML = `<tr><th>บริการ</th><th class="n">λ ราย/ชม.</th><th class="n">× load</th><th class="n">เวลารวม</th><th class="n">รอคิวรวม</th></tr>` +
+    $('#procTable').innerHTML = `<tr><th>บริการ</th><th class="n">λ เฉลี่ย ราย/ชม.</th><th class="n">λ ที่วิเคราะห์</th><th class="n">เวลารวม</th><th class="n">รอคิวรวม</th></tr>` +
       H.PROCESSES.map(p => { const r = analysis.processes[p.id];
         return `<tr><td>${p.icon} ${esc(p.name)}</td><td class="n"><input type="number" min="0" step="0.5" data-lam="${p.id}" value="${cfg.processes[p.id].lambda}"></td>
         <td class="n">${f1(r.lambdaH)}</td><td class="n">${fmtMin(r.total)}</td><td class="n">${fmtMin(r.wait)}</td></tr>`; }).join('');
-    document.querySelectorAll('[data-lam]').forEach(i => i.onchange = () => { cfg.processes[i.dataset.lam].lambda = Math.max(0, +i.value || 0); changed(); });
+    document.querySelectorAll('[data-lam]').forEach(i => i.onchange = () => { cfg.processes[i.dataset.lam].lambda = Math.max(0, +i.value || 0); P.fromLambdas(cfg); profileChanged(); });
 
     // station table
     $('#stTable').innerHTML = `<tr><th>หน่วยบริการ</th><th class="n">service time (นาที)</th><th>ความแปรปรวน</th><th class="n">slot (c)</th><th class="n">slot สูงสุด</th>
@@ -354,7 +387,137 @@
     updateDesCells(sim.stats());
     renderSuggestions();
     renderImprove();
+    renderAnalysisAt();
+    renderHourly();
   }
+
+  /* =================== โปรไฟล์ผู้รับบริการ =================== */
+  function selectPreset(id) {
+    cfg.profile = P.fromPreset(id);
+    profileChanged();
+  }
+
+  function renderProfile() {
+    const prof = cfg.profile;
+    prof.id = P.matchPreset(prof);
+    // ตัวเลือกบนหน้า 3D
+    $('#profSim').innerHTML = P.PRESETS.map(p => `<option value="${p.id}" ${p.id === prof.id ? 'selected' : ''}>${p.icon} ${esc(p.name)}</option>`).join('') +
+      (prof.id === 'custom' ? '<option value="custom" selected>✏️ กำหนดเอง</option>' : '');
+    // การ์ดโปรไฟล์ตัวอย่าง
+    $('#profPresets').innerHTML = P.PRESETS.map(p => {
+      const day = p.hourly.reduce((a, b) => a + b, 0);
+      return `<button class="pf ${p.id === prof.id ? 'on' : ''}" data-pf="${p.id}"><span class="ic">${p.icon}</span><span class="nm">${esc(p.name)}</span>
+        <span class="mt">${Math.round(day)} ราย/วัน · ${p.hourly.length} ชม.</span></button>`;
+    }).join('') + `<button class="pf ${prof.id === 'custom' ? 'on' : ''}" data-pf="custom"><span class="ic">✏️</span><span class="nm">กำหนดเอง</span><span class="mt">ปรับสัดส่วนและจำนวนรายชั่วโมงด้านล่าง</span></button>`;
+    $('#profPresets').querySelectorAll('[data-pf]').forEach(b => b.onclick = () => {
+      if (b.dataset.pf === 'custom') { const i = $('#profMix input[type=number]'); if (i) { i.scrollIntoView({ block: 'center', behavior: 'smooth' }); i.focus(); } return; }
+      selectPreset(b.dataset.pf);
+    });
+    const pr = P.PRESETS.find(x => x.id === prof.id);
+    $('#profDesc').innerHTML = pr ? `<b>${pr.icon} ${esc(pr.name)}</b> — ${esc(pr.desc)}`
+      : '<b>✏️ กำหนดเอง</b> — ค่าที่แก้จะใช้คำนวณคิวและจำลอง 3D ทันที · กดโปรไฟล์ตัวอย่างเพื่อเริ่มจากค่าตั้งต้นใหม่';
+
+    // สัดส่วนผู้รับบริการ
+    $('#profMix').innerHTML = `<h3>สัดส่วนผู้รับบริการ</h3><p class="hint">ผู้ป่วยแต่ละประเภทคิดเป็นกี่ % ของผู้มาใช้บริการทั้งหมด</p>
+      <div class="mixbar" id="mixBar"></div>
+      <div class="mix-row mix-head"><span>ประเภทผู้รับบริการ</span><span></span><span class="n">%</span><span class="n">ราย/วัน</span></div>
+      ${H.PROCESSES.map(p => `<div class="mix-row" title="${esc(p.desc)}"><span class="nm"><i style="background:${p.color}"></i>${p.icon} ${esc(p.name)}</span>
+        <input type="range" min="0" max="60" step="0.5" data-mix="${p.id}" value="${prof.mix[p.id] ?? 0}" aria-label="สัดส่วน ${esc(p.name)}">
+        <input type="number" min="0" max="100" step="0.1" data-mixn="${p.id}" value="${+(prof.mix[p.id] ?? 0).toFixed(1)}" aria-label="% ${esc(p.name)}">
+        <span class="n mono" id="mixday-${p.id}"></span></div>`).join('')}
+      <div class="mix-sum" id="mixSum"></div>`;
+    const setMix = (pid, v) => { prof.mix[pid] = Math.max(0, Math.min(100, +v || 0)); prof.id = P.matchPreset(prof); };
+    $('#profMix').querySelectorAll('[data-mix]').forEach(r => {
+      r.oninput = () => { setMix(r.dataset.mix, r.value); $(`[data-mixn="${r.dataset.mix}"]`).value = (+r.value).toFixed(1); changed(); };
+      r.onchange = () => renderProfile();
+    });
+    $('#profMix').querySelectorAll('[data-mixn]').forEach(i => i.onchange = () => { setMix(i.dataset.mixn, i.value); renderProfile(); changed(); });
+
+    // จำนวนผู้มาใช้บริการรายชั่วโมง
+    const n = prof.hourly.length;
+    $('#profHourly').innerHTML = `<h3>จำนวนผู้มาใช้บริการแต่ละช่วงเวลา</h3><p class="hint">ราย/ชั่วโมง (ก่อนคูณ load) — แก้ตัวเลขใต้แท่งได้ · จำนวนชั่วโมงเปิดตั้งที่ช่อง “ชั่วโมงเปิดบริการ”</p>
+      <div class="hr-wrap"><div class="hr-grid" style="grid-template-columns:repeat(${n}, minmax(0, 1fr));min-width:${n * 46}px">
+      ${prof.hourly.map((v, i) => `<div class="hr-col"><span class="v mono" id="hrv-${i}"></span><div class="hr-track"><div class="hr-bar" id="hrb-${i}"></div></div>
+        <input type="number" min="0" step="1" data-hr="${i}" value="${v}" aria-label="ผู้มาใช้บริการช่วง ${P.hourLabel(i)}"><span class="lb mono">${P.hourLabel(i)}</span></div>`).join('')}
+      </div></div>
+      <div class="hr-shape"><span class="hint">ปรับทั้งวัน:</span>
+        <button class="ghost" data-shape="0.9">−10% ทุกชั่วโมง</button><button class="ghost" data-shape="1.1">+10% ทุกชั่วโมง</button><button class="ghost" data-shape="flat">เท่ากันทุกชั่วโมง</button></div>
+      <div class="em" id="hrSum"></div>`;
+    $('#profHourly').querySelectorAll('[data-hr]').forEach(i => i.onchange = () => { prof.hourly[+i.dataset.hr] = Math.max(0, Math.round(+i.value || 0)); renderProfile(); changed(); });
+    $('#profHourly').querySelectorAll('[data-shape]').forEach(b => b.onclick = () => {
+      const k = b.dataset.shape, m = P.mean(prof);
+      prof.hourly = prof.hourly.map(v => k === 'flat' ? Math.round(m) : Math.round(v * +k));
+      renderProfile(); changed();
+    });
+    updateProfileDerived();
+  }
+
+  /** อัปเดตตัวเลขที่คำนวณจากโปรไฟล์ โดยไม่สร้าง DOM ใหม่ (ลาก slider ได้ต่อเนื่อง) */
+  function updateProfileDerived() {
+    const prof = cfg.profile; if (!$('#mixBar') || !prof) return;
+    const sh = P.shares(prof), day = prof.hourly.reduce((a, b) => a + b, 0) * cfg.load;
+    const total = Object.values(prof.mix).reduce((a, b) => a + b, 0);
+    $('#mixBar').innerHTML = H.PROCESSES.filter(p => sh[p.id] > 0).map(p => `<span style="width:${sh[p.id] * 100}%;background:${p.color}" title="${esc(p.name)} ${(sh[p.id] * 100).toFixed(1)}%"></span>`).join('');
+    H.PROCESSES.forEach(p => { const el = $('#mixday-' + p.id); if (el) el.textContent = Math.round(day * (sh[p.id] || 0)); });
+    const off = Math.abs(total - 100) > 0.05;
+    $('#mixSum').innerHTML = `รวม <b class="${off ? 'bad' : ''}">${total.toFixed(1)}%</b>${off ? ` · ระบบคิดเป็นสัดส่วนให้อัตโนมัติ <button class="ghost" id="mixNorm">ปรับให้รวม 100%</button>` : ''}`;
+    if (off) $('#mixNorm').onclick = () => {
+      const ks = Object.keys(prof.mix);
+      ks.forEach(k => prof.mix[k] = Math.round(prof.mix[k] / total * 1000) / 10);
+      const big = ks.reduce((a, k) => prof.mix[k] > prof.mix[a] ? k : a, ks[0]);   // เศษจากการปัดเศษไปไว้ที่ประเภทที่มากที่สุด
+      prof.mix[big] = Math.round((prof.mix[big] + 100 - ks.reduce((a, k) => a + prof.mix[k], 0)) * 10) / 10;
+      prof.id = P.matchPreset(prof); renderProfile(); changed();
+    };
+    // ไฮไลต์โปรไฟล์ที่ใช้อยู่ (ระหว่างลาก slider ยังไม่สร้าง DOM ใหม่)
+    prof.id = P.matchPreset(prof);
+    document.querySelectorAll('#profPresets [data-pf]').forEach(b => b.classList.toggle('on', b.dataset.pf === prof.id));
+    const mx = Math.max(1, ...prof.hourly), pk = P.peakHour(prof), ah = analysisHour();
+    prof.hourly.forEach((v, i) => {
+      const b = $('#hrb-' + i); if (!b) return;
+      b.style.height = (v / mx * 100) + '%';
+      b.classList.toggle('pk', i === pk); b.classList.toggle('sel', i === ah);
+      $('#hrv-' + i).textContent = Math.round(v * cfg.load);
+    });
+    const hs = $('#hrSum');
+    if (hs) hs.innerHTML = `<span>รวมทั้งวัน <b>${Math.round(day)}</b> ราย</span><span>เฉลี่ย <b>${f1(P.mean(prof) * cfg.load)}</b> ราย/ชม.</span>
+      <span>ชั่วโมงเร่งด่วน <b>${P.hourLabel(pk)}</b> · ${Math.round(prof.hourly[pk] * cfg.load)} ราย/ชม. (×${f2(P.factorAt(prof, pk))} ของค่าเฉลี่ย)</span>${cfg.load !== 1 ? `<span>คูณ load ${pct(cfg.load)} แล้ว</span>` : ''}`;
+  }
+
+  function renderAnalysisAt() {
+    const sel = $('#analysisAt'); if (!sel) return;
+    const prof = cfg.profile, pk = P.peakHour(prof);
+    sel.innerHTML = `<option value="avg">ค่าเฉลี่ยทั้งวัน</option><option value="peak">ชั่วโมงเร่งด่วน (${P.hourLabel(pk)})</option>` +
+      prof.hourly.map((v, i) => `<option value="h${i}">ช่วง ${P.hourLabel(i)}–${P.hourLabel(i + 1)} · ${Math.round(v * cfg.load)} ราย/ชม.</option>`).join('');
+    sel.value = analysisHour() === null ? 'avg' : cfg.analysisAt;
+    $('#analysisNote').textContent = 'ผลวิเคราะห์ทั้งหน้านี้ใช้: ' + analysisLabel();
+  }
+
+  /** ภาระรายชั่วโมง: วิเคราะห์คิวทีละชั่วโมง (SIPP) + คิวค้างสะสมข้ามชั่วโมงแบบ fluid */
+  function renderHourly() {
+    const el = $('#heat'); if (!el) return;
+    const prof = cfg.profile;
+    const hrs = prof.hourly.map((v, h) => Q.analyze(H, Object.assign({}, cfg, { timeFactor: P.factorAt(prof, h) })));
+    const rows = H.STATIONS.filter(s => hrs.some(a => a.stations[s.id].lambdaH > 0));
+    const back = {}; let worst = null;
+    rows.forEach(s => {
+      let b = 0;
+      back[s.id] = hrs.map((a, h) => { const m = a.stations[s.id]; b = Math.max(0, b + m.lambdaH - m.capH); if (!worst || b > worst.b) worst = { id: s.id, h, b }; return b; });
+    });
+    const pk = P.peakHour(prof), ah = analysisHour(), A = hrs[pk];
+    const bad = rows.filter(s => A.stations[s.id].status === 'critical').map(s => s.short);
+    const warn = rows.filter(s => A.stations[s.id].status === 'warn').map(s => s.short);
+    $('#hourCallout').innerHTML = `<div class="callout">ชั่วโมงเร่งด่วน <b>${P.hourLabel(pk)}–${P.hourLabel(pk + 1)}</b>: ผู้มาใช้บริการ ${Math.round(prof.hourly[pk] * cfg.load)} ราย/ชม. (×${f2(P.factorAt(prof, pk))} ของค่าเฉลี่ย) · คอขวด ${esc(stShort(A.bottleneck))} ρ ${pct(A.stations[A.bottleneck].rho)}
+      ${bad.length ? `<br>ล้นความสามารถช่วงนี้: <b>${bad.map(esc).join(', ')}</b>` : ''}${warn.length ? `<br>เฝ้าระวังช่วงนี้: ${warn.map(esc).join(', ')}` : ''}
+      ${worst && worst.b >= 1 ? `<br>คิวค้างสะสมมากที่สุด: <b>${esc(stName(worst.id))}</b> ≈ ${Math.round(worst.b)} คน ณ ${P.hourLabel(worst.h + 1)}` : '<br>ไม่มีหน่วยที่มีคิวค้างข้ามชั่วโมง'}</div>`;
+    el.innerHTML = `<tr><th>หน่วยบริการ</th>${prof.hourly.map((v, h) => `<th class="n ${h === pk ? 'pk' : ''} ${h === ah ? 'sel' : ''}">${P.hourLabel(h)}</th>`).join('')}</tr>
+      <tr class="arr"><td>ผู้มาใช้บริการ (ราย/ชม.)</td>${prof.hourly.map(v => `<td class="n">${Math.round(v * cfg.load)}</td>`).join('')}</tr>` +
+      rows.map(s => `<tr><td>${esc(s.name)}</td>${hrs.map((a, h) => {
+        const m = a.stations[s.id], b = back[s.id][h];
+        const tip = `${s.short} ${P.hourLabel(h)}: λ ${f1(m.lambdaH)}/ชม. · capacity ${f1(m.capH)}/ชม. · ρ ${pct(m.rho)} · รอ ${fmtMin(m.Wq)}${b >= 0.5 ? ' · คิวค้าง ≈ ' + Math.round(b) + ' คน' : ''}`;
+        return `<td class="n hc ${m.lambdaH > 0 ? m.status : 'idle'}" title="${esc(tip)}">${m.lambdaH > 0 ? pct(m.rho) : '–'}${b >= 0.5 ? `<small>ค้าง ${Math.round(b)}</small>` : ''}</td>`;
+      }).join('')}</tr>`).join('');
+  }
+
 
   /* ---------- สรุปผลการปรับปรุงตามคำแนะนำ ---------- */
   function renderImprove() {
@@ -369,7 +532,7 @@
     const prow = H.PROCESSES.map(p => { const a = A0.processes[p.id].total, b = A1.processes[p.id].total; const d = a - b;
       return `<tr><td>${p.icon} ${esc(p.name)}</td><td class="n">${fmtMin(a)}</td><td class="n"><b>${fmtMin(b)}</b></td><td class="n" style="color:${d > 0.5 ? 'var(--ok)' : 'var(--soft)'}">${d > 0.5 ? '−' + fmtMin(d) : '–'}</td></tr>`; }).join('');
     const bad = A => H.STATIONS.filter(s => ['warn', 'critical'].includes(A.stations[s.id].status)).length;
-    el.innerHTML = `<p class="sub">คำนวณที่ load ${pct(cfg.load)}, ${cfg.hours} ชม., เป้ารอ ≤ ${cfg.targetWq} นาที — หน่วยคอขวด/เฝ้าระวัง <b>${bad(A0)} → ${bad(A1)}</b> หน่วย · คอขวดหลัก ${esc(stShort(A0.bottleneck))} ρ ${pct(A0.stations[A0.bottleneck].rho)} → ${esc(stShort(A1.bottleneck))} ρ ${pct(A1.stations[A1.bottleneck].rho)}</p>
+    el.innerHTML = `<p class="sub">คำนวณที่ ${esc(analysisLabel())}, load ${pct(cfg.load)}, ${cfg.hours} ชม., เป้ารอ ≤ ${cfg.targetWq} นาที — หน่วยคอขวด/เฝ้าระวัง <b>${bad(A0)} → ${bad(A1)}</b> หน่วย · คอขวดหลัก ${esc(stShort(A0.bottleneck))} ρ ${pct(A0.stations[A0.bottleneck].rho)} → ${esc(stShort(A1.bottleneck))} ρ ${pct(A1.stations[A1.bottleneck].rho)}</p>
       <div class="grid2" style="gap:16px"><div class="scroll"><table class="t"><tr><th>หน่วยที่ปรับ</th><th class="n">slot</th><th class="n">service time</th><th>สถานะ</th><th class="n">ρ</th><th class="n">Wq</th><th>สิ่งที่ทำ</th></tr>${rows}</table></div>
       <div class="scroll"><table class="t"><tr><th>บริการ</th><th class="n">เวลารวม ก่อน</th><th class="n">หลัง</th><th class="n">ลดลง</th></tr>${prow}</table></div></div>`;
   }

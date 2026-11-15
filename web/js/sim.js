@@ -56,10 +56,21 @@
       if (!this.background) return;
       this.H.PROCESSES.forEach(p => this.scheduleArrival(p.id, this.time));
     }
-    rateOf(pid) { return (this.cfg.processes[pid]?.lambda ?? 0) * (this.cfg.load ?? 1) / 60; } // ราย/นาที
+    /** อัตรามาถึงเฉลี่ยของ process (ราย/นาที) ก่อนคูณตัวคูณรายชั่วโมง */
+    baseRate(pid) { return (this.cfg.processes[pid]?.lambda ?? 0) * (this.cfg.load ?? 1) / 60; }
+    /** ตัวคูณรายชั่วโมง ณ เวลา t (นาทีนับจาก 08:00) ตามโปรไฟล์ผู้รับบริการ */
+    hourFactor(t) {
+      const P = root.PROFILE, prof = this.cfg.profile;
+      if (!P || !prof) return 1;
+      const h = Math.floor((t % 1440) / 60);
+      return h < prof.hourly.length ? P.factorAt(prof, h) : 1;   // หลังเวลาเปิด (ถ้าไม่ปิดรับ) ใช้ค่าเฉลี่ย
+    }
+    maxFactor() { const P = root.PROFILE; return P && this.cfg.profile ? P.maxFactor(this.cfg.profile) : 1; }
+    rateOf(pid, t = this.time) { return this.baseRate(pid) * this.hourFactor(t); } // ราย/นาที
+    /** Non-homogeneous Poisson ด้วยวิธี thinning: สุ่มที่อัตราสูงสุด แล้วยอมรับด้วยความน่าจะเป็น r(t)/rMax */
     scheduleArrival(pid, from) {
-      const r = this.rateOf(pid); if (r <= 0) return;
-      this.push(from + this.exp(1 / r), 'arrive', { pid, token: this.arrivalToken });
+      const rMax = this.baseRate(pid) * this.maxFactor(); if (rMax <= 0) return;
+      this.push(from + this.exp(1 / rMax), 'arrive', { pid, token: this.arrivalToken, rMax });
     }
     setBackground(on) { this.background = on; this.scheduleAllArrivals(); }
     /** เรียกเมื่อผู้ใช้ปรับ λ/load → สุ่มเวลามาถึงใหม่ตามอัตราใหม่ */
@@ -146,7 +157,7 @@
     handle(e) {
       if (e.type === 'arrive') {
         if (e.token !== this.arrivalToken || !this.background) return;
-        if (this.arrivalsOpen()) this.spawn(e.pid);
+        if (this.arrivalsOpen() && this.rand() < this.rateOf(e.pid) / e.rMax) this.spawn(e.pid);
         this.scheduleArrival(e.pid, this.time);
         return;
       }

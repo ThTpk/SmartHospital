@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartHospital · Patient Flow Simulator</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/app.css?v=8">
 </head>
 <body>
 <div class="app">
@@ -42,6 +42,7 @@
               <option value="0.25">0.25 นาที/วิ</option><option value="0.5">0.5 นาที/วิ</option><option value="1" selected>1 นาที/วิ</option>
               <option value="2">2 นาที/วิ</option><option value="5">5 นาที/วิ</option><option value="10">10 นาที/วิ</option><option value="30">30 นาที/วิ</option>
             </select></label>
+          <label>โปรไฟล์ <select id="profSim" title="โปรไฟล์ผู้รับบริการ"></select></label>
           <label>Load <input type="range" id="loadSim" min="0" max="2" step="0.05" value="1" style="width:110px"><b class="mono" id="loadSimV">100%</b></label>
           <label><input type="checkbox" id="bg" checked> ผู้ป่วยอื่นในระบบ</label>
           <button class="ghost" id="reset">↺ เริ่มใหม่</button>
@@ -61,11 +62,20 @@
   <!-- ===================== 2. Queue analysis ===================== -->
   <section class="page" id="page-queue">
     <div class="wrap">
+      <div class="card" id="profileCard">
+        <h2>โปรไฟล์ผู้รับบริการ</h2>
+        <p class="sub">เลือกลักษณะผู้มาใช้บริการจากตัวอย่าง 6 แบบ หรือกำหนดเอง ทั้งสัดส่วนผู้ป่วยแต่ละประเภทและจำนวนผู้มาใช้บริการในแต่ละชั่วโมง — ใช้กับทั้งการวิเคราะห์คิวและการจำลอง 3D</p>
+        <div class="pf-grid" id="profPresets"></div>
+        <p class="pf-desc" id="profDesc"></p>
+        <div class="grid2 pf-edit"><div id="profMix"></div><div id="profHourly"></div></div>
+      </div>
+
       <div class="card">
         <h2>พารามิเตอร์แบบจำลองแถวคอย</h2>
         <p class="sub">ปรับ load, ชั่วโมงเปิดให้บริการ และเป้าหมายเวลารอ — ผลคำนวณและการจำลอง 3D อัปเดตทันที</p>
         <div class="params">
           <label>Load ผู้ใช้บริการ (ตัวคูณ) <input type="range" id="load" min="0" max="2" step="0.05" value="1"><b class="mono" id="loadV">100%</b></label>
+          <label>วิเคราะห์ที่ช่วงเวลา <select id="analysisAt"></select></label>
           <label>ชั่วโมงเปิดบริการ <input type="number" id="hours" min="1" max="24" step="1" value="8"></label>
           <label>เป้าหมายเวลารอ Wq (นาที) <input type="number" id="target" min="1" max="120" step="1" value="15"></label>
           <label>ρ สูงสุดที่ยอมรับ <input type="number" id="rhoMax" min="0.5" max="0.99" step="0.01" value="0.85"></label>
@@ -74,6 +84,7 @@
           <label><span><input type="checkbox" id="closeAfter"> ปิดรับผู้ป่วยหลังครบชั่วโมงเปิด</span></label>
           <button class="ghost" id="resetCfg">คืนค่าเริ่มต้น</button>
         </div>
+        <p class="sub" id="analysisNote" style="margin:10px 0 0"></p>
       </div>
 
       <div class="card">
@@ -85,6 +96,13 @@
           </div>
         </div>
         <div id="improve"></div>
+      </div>
+
+      <div class="card">
+        <h2>ภาระรายชั่วโมง</h2>
+        <p class="sub">ρ ของแต่ละหน่วยในแต่ละชั่วโมงตามโปรไฟล์ผู้รับบริการ (วิเคราะห์แยกทีละชั่วโมง) · “ค้าง” = คิวที่ล้นสะสมข้ามไปชั่วโมงถัดไป · ชี้ที่ช่องเพื่อดูรายละเอียด</p>
+        <div id="hourCallout"></div>
+        <div class="scroll" style="margin-top:12px"><table class="t heat" id="heat"></table></div>
       </div>
 
       <div class="grid2">
@@ -163,11 +181,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script src="js/data.js"></script>
-<script src="js/layout.js"></script>
-<script src="js/queue.js"></script>
-<script src="js/sim.js"></script>
-<script src="js/scene3d.js"></script>
-<script src="js/main.js"></script>
+<script src="js/data.js?v=8"></script>
+<script src="js/layout.js?v=8"></script>
+<script src="js/queue.js?v=8"></script>
+<script src="js/profile.js?v=8"></script>
+<script src="js/sim.js?v=8"></script>
+<script src="js/scene3d.js?v=8"></script>
+<script src="js/main.js?v=8"></script>
 </body>
 </html>
