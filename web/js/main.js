@@ -106,6 +106,10 @@
     recompute();
     sim = new window.HospitalSim(H, cfg, { onEvent: onTrackedEvent, seed: 7 });
     view = new window.Hospital3D($('#three'), H, L);
+    let eco = false; try { eco = localStorage.getItem('smarthospital.eco') === '1'; } catch (e) { /* ignore */ }
+    $('#eco').checked = eco; view.setEco(eco);
+    if (document.fonts) document.fonts.ready.then(() => { view.labelKey = {}; });   // วาดป้ายใหม่เมื่อฟอนต์ไทยโหลดเสร็จ
+    $('#eco').onchange = e => { view.setEco(e.target.checked); try { localStorage.setItem('smarthospital.eco', e.target.checked ? '1' : '0'); } catch (err) { /* ignore */ } };
     window.SH = { sim, view, get cfg() { return cfg; }, get analysis() { return analysis; }, renderQueue, updateHud: () => updateHud(sim.stats()) }; // debug handle
 
     // tabs
@@ -113,7 +117,7 @@
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
       document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + b.dataset.page));
       if (b.dataset.page === 'sim') view.resize();
-      if (b.dataset.page === 'queue') renderQueue();
+      if (b.dataset.page === 'queue') { renderQueue(); renderHourly(); }
     });
     document.querySelectorAll('[data-wf]').forEach(b => b.onclick = () => { $('#wf').src = b.dataset.wf; });
 
@@ -132,9 +136,12 @@
     function frame(now) {
       const dt = Math.min(0.25, (now - last) / 1000); last = now;
       if (playing) sim.step(dt * speed);
-      const stats = sim.stats();
-      view.update(sim, analysis, stats);
-      if (now - hudT > 300) { hudT = now; updateHud(stats); updateJourney(); }
+      // วาด 3D เฉพาะเมื่ออยู่ที่แท็บจำลอง 3D (การจำลองคิวยังเดินต่อ)
+      if ($('#page-sim').classList.contains('active') && !document.hidden) {
+        const stats = sim.stats();
+        view.update(sim, analysis, stats);
+        if (now - hudT > 300) { hudT = now; updateHud(stats); updateJourney(); }
+      }
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
@@ -290,6 +297,12 @@
   }
 
   function changed() { recompute(); sim.ratesChanged(); renderQueue(); renderProcList(); renderProcDetail(); renderEditor(); updateProfileDerived(); }
+  /** ระหว่างลาก slider คำนวณใหม่อย่างมาก ~8 ครั้ง/วินาที */
+  let soonT = null;
+  function changedSoon() {
+    if (soonT) return;
+    soonT = setTimeout(() => { soonT = null; changed(); }, 120);
+  }
   function profileChanged() { $('#hours').value = cfg.profile.hourly.length; renderProfile(); changed(); }
 
   function setSvc(id, v) { cfg.stations[id].svc = Math.max(0.5, Math.round((+v || 1) * 10) / 10); changed(); }
@@ -328,7 +341,8 @@
       <p class="hint">คลิกห้องในแผนผัง 3D หรือชื่อขั้นตอนด้านบน เพื่อเลือกหน่วยที่จะตั้งค่า</p>`;
     $('#edSel').onchange = e => { editing = e.target.value; renderEditor(); view.follow(null); view.focusStation(editing); };
     const live = v => { cfg.stations[editing].svc = Math.max(0.5, +v); $('#edSvc').value = cfg.stations[editing].svc; recompute(); $('#emBox').innerHTML = editorMetrics(); };
-    $('#edSvcR').oninput = e => live(e.target.value);
+    let liveT = null;
+    $('#edSvcR').oninput = () => { if (liveT) return; liveT = setTimeout(() => { liveT = null; live($('#edSvcR').value); }, 80); };
     $('#edSvcR').onchange = () => setSvc(editing, cfg.stations[editing].svc);
     $('#edSvc').onchange = e => { e.target.blur(); setSvc(editing, e.target.value); };
     $('#edDist').onchange = e => { cfg.stations[editing].dist = e.target.value; changed(); };
@@ -388,7 +402,7 @@
     renderSuggestions();
     renderImprove();
     renderAnalysisAt();
-    renderHourly();
+    if ($('#page-queue').classList.contains('active')) renderHourly();   // ตารางรายชั่วโมงคำนวณหนัก: ทำเฉพาะเมื่อเปิดแท็บนี้
   }
 
   /* =================== โปรไฟล์ผู้รับบริการ =================== */
@@ -428,8 +442,8 @@
       <div class="mix-sum" id="mixSum"></div>`;
     const setMix = (pid, v) => { prof.mix[pid] = Math.max(0, Math.min(100, +v || 0)); prof.id = P.matchPreset(prof); };
     $('#profMix').querySelectorAll('[data-mix]').forEach(r => {
-      r.oninput = () => { setMix(r.dataset.mix, r.value); $(`[data-mixn="${r.dataset.mix}"]`).value = (+r.value).toFixed(1); changed(); };
-      r.onchange = () => renderProfile();
+      r.oninput = () => { setMix(r.dataset.mix, r.value); $(`[data-mixn="${r.dataset.mix}"]`).value = (+r.value).toFixed(1); changedSoon(); };
+      r.onchange = () => { clearTimeout(soonT); soonT = null; renderProfile(); changed(); };
     });
     $('#profMix').querySelectorAll('[data-mixn]').forEach(i => i.onchange = () => { setMix(i.dataset.mixn, i.value); renderProfile(); changed(); });
 

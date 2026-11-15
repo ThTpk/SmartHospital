@@ -15,10 +15,11 @@
       this.el = el; this.H = H; this.L = L;
       this.stations = {}; this.patients = new Map();
       this.routeGroup = null; this.followId = null; this.labelTimer = 0;
+      this.labelKey = {};              // วาดป้ายใหม่เฉพาะเมื่อข้อมูลเปลี่ยน
+      this.QUEUE_FIGS = 30;            // วาดหุ่นผู้ป่วยที่รอคิวไม่เกินหน่วยละ 30 คน (ที่เกินแสดงเป็นตัวเลขบนป้าย)
 
-      const r = this.renderer = new T.WebGLRenderer({ antialias: true });
-      r.setPixelRatio(Math.min(2, root.devicePixelRatio || 1));
-      r.shadowMap.enabled = true; r.shadowMap.type = T.PCFSoftShadowMap;
+      const r = this.renderer = new T.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
+      r.shadowMap.type = T.PCFShadowMap;
       el.appendChild(r.domElement);
 
       const sc = this.scene = new T.Scene();
@@ -35,7 +36,8 @@
       sc.add(new T.HemisphereLight(0xffffff, 0xb8c0cc, 0.75));
       const sun = new T.DirectionalLight(0xffffff, 0.65);
       sun.position.set(-30, 60, 40); sun.castShadow = true;
-      sun.shadow.mapSize.set(2048, 2048);
+      sun.shadow.mapSize.set(1024, 1024);   // 1024² ใช้หน่วยความจำการ์ดจอ 1/4 ของ 2048²
+      this.sun = sun;
       Object.assign(sun.shadow.camera, { left: -60, right: 60, top: 50, bottom: -50, near: 1, far: 160 });
       sc.add(sun);
 
@@ -45,8 +47,10 @@
         chair: new T.BoxGeometry(0.7, 0.45, 0.7),
         desk: new T.BoxGeometry(1.4, 0.8, 0.7),
         bed: new T.BoxGeometry(1.0, 0.55, 2.0),
-        ring: new T.RingGeometry(0.55, 0.75, 28)
+        ring: new T.RingGeometry(0.55, 0.75, 28),
+        beacon: new T.ConeGeometry(0.35, 0.8, 4)
       };
+      this.trackMat = new T.MeshBasicMaterial({ color: 0xeb6c36, side: T.DoubleSide });   // ใช้ร่วมกันทุกผู้ป่วยที่ติดตาม
       this.mat = {
         floor: new T.MeshLambertMaterial({ color: 0xf7f8fa }),
         corridor: new T.MeshLambertMaterial({ color: 0xdde3ec }),
@@ -168,19 +172,24 @@
       g.scale.setScalar(scale); return g;
     }
 
-    canvasSprite(w, h, scale) {
-      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-      const tex = new T.CanvasTexture(cv); tex.anisotropy = 4;
+    canvasSprite(w, h, scale, res = 1) {
+      const cv = document.createElement('canvas'); cv.width = Math.round(w * res); cv.height = Math.round(h * res);
+      const tex = new T.CanvasTexture(cv);
+      tex.generateMipmaps = false; tex.minFilter = T.LinearFilter;   // ไม่สร้าง mipmap: ลดหน่วยความจำและเวลาอัปโหลด
+      cv.getContext('2d').setTransform(res, 0, 0, res, 0, 0);        // วาดด้วยพิกัดเดิม แต่ canvas เล็กลง
       const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
       sp.scale.set(scale, scale * h / w, 1); sp.renderOrder = 10; sp.userData = { cv, tex };
       return sp;
     }
-    makeLabel() { return this.canvasSprite(512, 176, 9); }
+    makeLabel() { return this.canvasSprite(512, 176, 9, 0.5); }
     makeTag() { return this.canvasSprite(128, 128, 3.2); }
 
     drawLabel(id, info) {
+      const key = `${info.status}|${info.queue}|${info.busy}|${info.c}`;
+      if (this.labelKey[id] === key) return;      // ไม่เปลี่ยน → ไม่ต้องวาดและอัปโหลดใหม่
+      this.labelKey[id] = key;
       const S = this.stations[id]; const { cv, tex } = S.label.userData; const x = cv.getContext('2d');
-      x.clearRect(0, 0, cv.width, cv.height);
+      x.clearRect(0, 0, 512, 176);
       const col = { ok: '#3f8f5a', warn: '#c98612', critical: '#c8372d', idle: '#7a8399' }[info.status] || '#7a8399';
       round(x, 6, 6, 500, 164, 22); x.fillStyle = 'rgba(255,255,255,0.94)'; x.fill();
       x.lineWidth = 6; x.strokeStyle = col; x.stroke();
@@ -213,7 +222,11 @@
 
     /** แสดงเส้นทางของ process ที่เลือก (เส้นสีส้ม + หมายเลขลำดับบนห้อง) */
     showRoute(proc) {
-      if (this.routeGroup) { this.scene.remove(this.routeGroup); this.routeGroup = null; }
+      if (this.routeGroup) {   // คืนหน่วยความจำของเส้นทางเดิม
+        this.scene.remove(this.routeGroup);
+        this.routeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+        this.routeGroup = null;
+      }
       Object.values(this.stations).forEach(S => { S.stepTag.visible = false; S.g.children.forEach(o => { if (o.material && o.material.opacity !== undefined && o === S.plate) o.material.opacity = 0.55; }); });
       if (!proc) return;
       const g = this.routeGroup = new T.Group(); this.scene.add(g);
@@ -251,17 +264,32 @@
     follow(id) { this.followId = id; }
 
     /** อัปเดตทุกเฟรมจากสถานะ DES */
+    /** ซ่อน/แสดงเงา และลดความละเอียดในโหมดประหยัด */
+    setEco(on) {
+      this.eco = on;
+      const r = this.renderer;
+      r.setPixelRatio(on ? 1 : Math.min(1.5, root.devicePixelRatio || 1));
+      r.shadowMap.enabled = !on; this.sun.castShadow = !on;
+      if (on && this.sun.shadow.map) { this.sun.shadow.map.dispose(); this.sun.shadow.map = null; }
+      this.scene.traverse(o => { if (o.material) o.material.needsUpdate = true; });
+      this.resize();
+    }
+
     update(sim, analysis, statsNow) {
       const seen = new Set();
+      // ผู้ป่วยที่รอคิวเกิน QUEUE_FIGS คนต่อหน่วยไม่ต้องวาด (จำนวนจริงแสดงบนป้ายห้อง)
+      const hidden = new Set();
+      Object.values(sim.st).forEach(st => { for (let i = this.QUEUE_FIGS; i < st.queue.length; i++) hidden.add(st.queue[i].id); });
       sim.patients.forEach(p => {
+        if (hidden.has(p.id) && !p.tracked) return;
         seen.add(p.id);
         let m = this.patients.get(p.id);
         if (!m) {
           m = this.figure(this.procMat[p.pid], p.tracked ? 1.35 : 1);
           if (p.tracked) {
-            const ring = new T.Mesh(this.geo.ring, new T.MeshBasicMaterial({ color: 0xeb6c36, side: T.DoubleSide }));
+            const ring = new T.Mesh(this.geo.ring, this.trackMat);
             ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; m.add(ring);
-            const beacon = new T.Mesh(new T.ConeGeometry(0.35, 0.8, 4), new T.MeshBasicMaterial({ color: 0xeb6c36 }));
+            const beacon = new T.Mesh(this.geo.beacon, this.trackMat);
             beacon.rotation.x = Math.PI; beacon.position.y = 2.6; m.add(beacon); m.userData.beacon = beacon;
           }
           const pos0 = sim.positionOf(p); m.position.set(pos0.x, 0, pos0.z);

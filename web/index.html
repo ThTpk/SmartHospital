@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartHospital · Patient Flow Simulator</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=9">
+  <link rel="stylesheet" href="css/app.css?v=10">
 </head>
 <body>
 <div class="app">
@@ -45,6 +45,7 @@
           <label>โปรไฟล์ <select id="profSim" title="โปรไฟล์ผู้รับบริการ"></select></label>
           <label>Load <input type="range" id="loadSim" min="0" max="2" step="0.05" value="1" style="width:110px"><b class="mono" id="loadSimV">100%</b></label>
           <label><input type="checkbox" id="bg" checked> ผู้ป่วยอื่นในระบบ</label>
+          <label title="ปิดเงาและลดความละเอียด เพื่อลดการใช้หน่วยความจำและการ์ดจอ"><input type="checkbox" id="eco"> โหมดประหยัด</label>
           <button class="ghost" id="reset">↺ เริ่มใหม่</button>
           <button class="ghost" id="overview">⌂ มุมมองรวม</button>
         </div>
@@ -183,12 +184,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script src="js/data.js?v=9"></script>
-<script src="js/layout.js?v=9"></script>
-<script src="js/queue.js?v=9"></script>
-<script src="js/profile.js?v=9"></script>
-<script src="js/sim.js?v=9"></script>
-<script src="js/scene3d.js?v=9"></script>
-<script src="js/main.js?v=9"></script>
+<script src="js/data.js?v=10"></script>
+<script src="js/layout.js?v=10"></script>
+<script src="js/queue.js?v=10"></script>
+<script src="js/profile.js?v=10"></script>
+<script src="js/sim.js?v=10"></script>
+<script src="js/scene3d.js?v=10"></script>
+<script src="js/main.js?v=10"></script>
 </body>
 </html>
