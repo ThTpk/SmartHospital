@@ -3,6 +3,7 @@
   "diagram_type": "workflow",
   "meta": {
     "title": "บริการเฉพาะทาง: ทำแผล ฉีดยา วัคซีน ทันตกรรม และกายภาพบำบัด",
+    "output": "web/diagrams/swimlane-opd-specialty.html",
     "quality_profile": "showcase",
     "legend": {
       "entries": {

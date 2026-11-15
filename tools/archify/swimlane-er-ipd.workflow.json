@@ -3,6 +3,7 @@
   "diagram_type": "workflow",
   "meta": {
     "title": "เส้นทางผู้ป่วยฉุกเฉิน: คัดแยก รักษา ผ่าตัด และรับไว้นอนโรงพยาบาล",
+    "output": "web/diagrams/swimlane-er-ipd.html",
     "quality_profile": "showcase",
     "legend": {
       "entries": {
@@ -46,7 +47,7 @@
     { "id": "arrive", "lane": "patient", "col": 0, "width": 148, "type": "external", "label": "มาถึงประตูฉุกเฉิน", "sublabel": "ER ENTRANCE · 24/7" },
     { "id": "ert", "lane": "er", "col": 1, "width": 148, "type": "frontend", "label": "คัดแยกความรุนแรง", "sublabel": "ESI 1-5 · 4 min", "tag": "ERT" },
     { "id": "erdoc", "lane": "er", "col": 2, "width": 148, "type": "security", "label": "แพทย์ ER ประเมิน", "sublabel": "25 min · c=5", "tag": "จุดตัดสินใจ" },
-    { "id": "lab", "lane": "diag", "col": 1, "width": 148, "type": "database", "label": "Lab · X-ray", "sublabel": "5 / 10 min", "tag": "LAB" },
+    { "id": "lab", "lane": "diag", "col": 3, "width": 148, "type": "database", "label": "Lab · X-ray", "sublabel": "5 / 10 min", "tag": "LAB" },
     { "id": "or", "lane": "surgery", "col": 2, "width": 148, "type": "backend", "label": "ห้องผ่าตัด", "sublabel": "90 min · c=3", "tag": "OR" },
     { "id": "pacu", "lane": "surgery", "col": 3, "width": 148, "type": "backend", "label": "ห้องพักฟื้น", "sublabel": "60 min · c=4", "tag": "PACU" },
     { "id": "adm", "lane": "ipd", "col": 4, "width": 148, "type": "backend", "label": "Admit เข้าหอผู้ป่วย", "sublabel": "15 + 30 min", "tag": "ADM" },

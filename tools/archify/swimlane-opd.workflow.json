@@ -3,6 +3,7 @@
   "diagram_type": "workflow",
   "meta": {
     "title": "เส้นทางผู้ป่วยนอก (OPD): จากประตูโรงพยาบาลถึงรับยากลับบ้าน",
+    "output": "web/diagrams/swimlane-opd.html",
     "quality_profile": "showcase",
     "legend": {
       "entries": {

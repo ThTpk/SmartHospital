@@ -3,6 +3,7 @@
   "diagram_type": "workflow",
   "meta": {
     "title": "ผ่าตัดวันเดียวกลับ และ Admit จากแผนกผู้ป่วยนอก",
+    "output": "web/diagrams/swimlane-surgery-admit.html",
     "quality_profile": "showcase",
     "legend": {
       "entries": {
