@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "เส้นทางผู้ป่วยฉุกเฉิน: คัดแยก รักษา ผ่าตัด และรับไว้นอนโรงพยาบาล",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "external": {
+          "label": "ผู้ป่วยเข้า-ออก"
+        },
+        "frontend": {
+          "label": "เวชระเบียน / คัดกรอง"
+        },
+        "security": {
+          "label": "จุดคอขวด / ตัดสินใจ"
+        },
+        "database": {
+          "label": "ตรวจวินิจฉัย / หอผู้ป่วย"
+        },
+        "backend": {
+          "label": "บริการทางการแพทย์"
+        },
+        "messagebus": {
+          "label": "การเงิน & ยา"
+        }
+      }
+    }
+  },
+  "lanes": [
+    { "id": "patient", "label": "ผู้ป่วย / ญาติ" },
+    { "id": "er", "label": "ห้องฉุกเฉิน" },
+    { "id": "diag", "label": "ตรวจวินิจฉัย" },
+    { "id": "surgery", "label": "ผ่าตัด" },
+    { "id": "ipd", "label": "ผู้ป่วยใน & การเงิน" }
+  ],
+  "mainPath": [
+    "arrive",
+    "ert",
+    "erdoc",
+    "adm",
+    "dc",
+    "home"
+  ],
+  "nodes": [
+    { "id": "arrive", "lane": "patient", "col": 0, "width": 148, "type": "external", "label": "มาถึงประตูฉุกเฉิน", "sublabel": "ER ENTRANCE · 24/7" },
+    { "id": "ert", "lane": "er", "col": 1, "width": 148, "type": "frontend", "label": "คัดแยกความรุนแรง", "sublabel": "ESI 1-5 · 4 min", "tag": "ERT" },
+    { "id": "erdoc", "lane": "er", "col": 2, "width": 148, "type": "security", "label": "แพทย์ ER ประเมิน", "sublabel": "25 min · c=5", "tag": "จุดตัดสินใจ" },
+    { "id": "lab", "lane": "diag", "col": 1, "width": 148, "type": "database", "label": "Lab · X-ray", "sublabel": "5 / 10 min", "tag": "LAB" },
+    { "id": "or", "lane": "surgery", "col": 2, "width": 148, "type": "backend", "label": "ห้องผ่าตัด", "sublabel": "90 min · c=3", "tag": "OR" },
+    { "id": "pacu", "lane": "surgery", "col": 3, "width": 148, "type": "backend", "label": "ห้องพักฟื้น", "sublabel": "60 min · c=4", "tag": "PACU" },
+    { "id": "adm", "lane": "ipd", "col": 4, "width": 148, "type": "backend", "label": "Admit เข้าหอผู้ป่วย", "sublabel": "15 + 30 min", "tag": "ADM" },
+    { "id": "dc", "lane": "ipd", "col": 5, "width": 148, "type": "messagebus", "label": "จำหน่าย ชำระเงิน", "sublabel": "CSH · PHA", "tag": "CSH" },
+    { "id": "home", "lane": "patient", "col": 5, "width": 148, "type": "external", "label": "กลับบ้าน", "sublabel": "EXIT" }
+  ],
+  "edges": [
+    { "from": "arrive", "to": "ert", "variant": "emphasis" },
+    { "from": "ert", "to": "erdoc", "variant": "emphasis" },
+    { "from": "erdoc", "to": "lab", "label": "ส่งตรวจ", "role": "branch" },
+    { "from": "lab", "to": "erdoc", "label": "ผลตรวจ", "variant": "dashed", "role": "return" },
+    { "from": "erdoc", "to": "or", "label": "ต้องผ่าตัด", "role": "branch" },
+    { "from": "or", "to": "pacu" },
+    { "from": "pacu", "to": "adm" },
+    { "from": "erdoc", "to": "adm", "label": "รับไว้รักษา", "variant": "emphasis" },
+    { "from": "adm", "to": "dc", "variant": "emphasis" },
+    { "from": "dc", "to": "home", "label": "จำหน่าย", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "slate", "title": "สามทางเลือกหลังพบแพทย์ ER", "items": ["รักษาแล้วจำหน่าย → การเงิน/ยา (process ER ในแบบจำลอง)", "ผ่าตัด → พักฟื้น → Admit", "รับไว้รักษาโดยตรง → Admit → หอผู้ป่วย"] },
+    { "dot": "orange", "title": "จุดตัดสินใจ: แพทย์ ER", "items": ["ผู้ป่วย ER ผ่านห้องฉุกเฉิน 2 ครั้ง → เพิ่มเป็น 5 ทีม ρ 83% → 67%", "Lab/X-ray ใช้ร่วมกับ OPD → คิว X-ray ของ OPD ส่งผลต่อ ER", "แนะนำ: แยกคิว ER ออกจาก OPD และ fast track ESI 4-5"] },
+    { "dot": "cyan", "title": "ระยะเวลานอนโรงพยาบาล", "items": ["แบบจำลองคิวนับถึงการรับเข้าหอ (ไม่รวมวันนอน)", "ผ่าตัดตามนัด และ Admit จาก OPD → “ผ่าตัด / Admit”", "ICU / ห้องคลอด อยู่นอกขอบเขตการจำลอง"] }
+  ]
+}

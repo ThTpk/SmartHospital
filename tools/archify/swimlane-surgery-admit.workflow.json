@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "ผ่าตัดวันเดียวกลับ และ Admit จากแผนกผู้ป่วยนอก",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "external": {
+          "label": "ผู้ป่วยเข้า-ออก"
+        },
+        "frontend": {
+          "label": "เวชระเบียน / คัดกรอง"
+        },
+        "backend": {
+          "label": "บริการทางการแพทย์"
+        },
+        "security": {
+          "label": "จุดคอขวด / ตัดสินใจ"
+        },
+        "database": {
+          "label": "ตรวจวินิจฉัย / หอผู้ป่วย"
+        },
+        "messagebus": {
+          "label": "การเงิน & ยา"
+        }
+      }
+    }
+  },
+  "lanes": [
+    { "id": "patient", "label": "ผู้ป่วย" },
+    { "id": "front", "label": "เวชระเบียน & แพทย์ OPD" },
+    { "id": "diag", "label": "ตรวจวินิจฉัย" },
+    { "id": "surgery", "label": "ผ่าตัด" },
+    { "id": "ipd", "label": "ผู้ป่วยใน & การเงิน" }
+  ],
+  "mainPath": [
+    "arrive",
+    "reg",
+    "ane",
+    "lab",
+    "or",
+    "csh",
+    "home"
+  ],
+  "nodes": [
+    { "id": "arrive", "lane": "patient", "col": 0, "width": 148, "type": "external", "label": "มาถึงโรงพยาบาล", "sublabel": "MAIN ENTRANCE" },
+    { "id": "reg", "lane": "front", "col": 1, "width": 148, "type": "frontend", "label": "ลงทะเบียน ตรวจสิทธิ", "sublabel": "2.5 min · c=4", "tag": "REG" },
+    { "id": "doc", "lane": "front", "col": 2, "width": 148, "type": "backend", "label": "คัดกรอง + แพทย์", "sublabel": "TRI 5 · DOC 10 min", "tag": "DOC" },
+    { "id": "ane", "lane": "surgery", "col": 1, "width": 148, "type": "backend", "label": "เตรียมผ่าตัด", "sublabel": "วิสัญญี · 20 min", "tag": "ANE" },
+    { "id": "lab", "lane": "diag", "col": 2, "width": 148, "type": "security", "label": "Lab เจาะเลือด", "sublabel": "5 min · c=3", "tag": "ρ ≈ 72%" },
+    { "id": "or", "lane": "surgery", "col": 3, "width": 148, "type": "backend", "label": "ผ่าตัด → พักฟื้น", "sublabel": "OR 90 · PACU 60 min", "tag": "OR" },
+    { "id": "adm", "lane": "ipd", "col": 3, "width": 148, "type": "database", "label": "Admit เข้าหอ", "sublabel": "15 + 30 min · END", "tag": "ADM" },
+    { "id": "csh", "lane": "ipd", "col": 4, "width": 148, "type": "messagebus", "label": "ชำระเงิน · รับยา", "sublabel": "CSH · PHA", "tag": "CSH" },
+    { "id": "home", "lane": "patient", "col": 5, "width": 148, "type": "external", "label": "กลับบ้าน", "sublabel": "EXIT" }
+  ],
+  "edges": [
+    { "from": "arrive", "to": "reg", "variant": "emphasis" },
+    { "from": "reg", "to": "ane", "label": "นัดผ่าตัด", "variant": "emphasis" },
+    { "from": "reg", "to": "doc", "role": "branch" },
+    { "from": "ane", "to": "lab", "variant": "emphasis" },
+    { "from": "doc", "to": "lab", "role": "branch" },
+    { "from": "lab", "to": "or", "variant": "emphasis" },
+    { "from": "lab", "to": "adm", "label": "แพทย์สั่ง Admit", "role": "branch" },
+    { "from": "or", "to": "csh", "variant": "emphasis" },
+    { "from": "csh", "to": "home", "label": "กลับบ้าน", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "slate", "title": "2 เส้นทาง", "items": ["ผ่าตัดวันเดียวกลับ: ลงทะเบียน → เตรียมผ่าตัด → Lab → ผ่าตัด → พักฟื้น → การเงิน → ห้องยา (≈ 219 นาที)", "Admit จาก OPD: ลงทะเบียน → คัดกรอง → แพทย์ → Lab → Admit → หอผู้ป่วย (≈ 99 นาที)", "Admit จบที่หอผู้ป่วย แบบจำลองคิวไม่นับวันนอน"] },
+    { "dot": "orange", "title": "จุดร่วม: Lab", "items": ["รับ 26 ราย/ชม. จากตรวจเลือด ตรวจสุขภาพ ER ผ่าตัด และ Admit → ρ ≈ 72%", "คิว Lab ของ OPD ช่วงเช้าทำให้ผู้ป่วยผ่าตัดเข้าห้องผ่าตัดช้าลง", "แนะนำ: เจาะเลือดก่อนผ่าตัดล่วงหน้าตั้งแต่วันนัด"] },
+    { "dot": "cyan", "title": "ภาระของแต่ละหน่วย", "items": ["เตรียมผ่าตัด ρ 33% · ห้องผ่าตัด ρ 50% · Admit ρ 50%", "ผ่าตัดฉุกเฉินจาก ER → “ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน”"] }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "เส้นทางผู้ป่วยนอก (OPD): จากประตูโรงพยาบาลถึงรับยากลับบ้าน",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "external": {
+          "label": "ผู้ป่วยเข้า-ออก"
+        },
+        "frontend": {
+          "label": "เวชระเบียน / คัดกรอง"
+        },
+        "backend": {
+          "label": "บริการทางการแพทย์"
+        },
+        "database": {
+          "label": "ตรวจวินิจฉัย / หอผู้ป่วย"
+        },
+        "messagebus": {
+          "label": "การเงิน & ยา"
+        },
+        "security": {
+          "label": "จุดคอขวด / ตัดสินใจ"
+        }
+      }
+    }
+  },
+  "lanes": [
+    { "id": "patient", "label": "ผู้ป่วย" },
+    { "id": "front", "label": "เวชระเบียน & คัดกรอง" },
+    { "id": "clinic", "label": "แพทย์ OPD" },
+    { "id": "diag", "label": "ตรวจวินิจฉัย" },
+    { "id": "billing", "label": "การเงิน & เภสัชกรรม" }
+  ],
+  "mainPath": [
+    "arrive",
+    "reg",
+    "tri",
+    "doc",
+    "csh",
+    "pha",
+    "home"
+  ],
+  "nodes": [
+    { "id": "arrive", "lane": "patient", "col": 0, "width": 148, "type": "external", "label": "มาถึงโรงพยาบาล", "sublabel": "MAIN ENTRANCE" },
+    { "id": "reg", "lane": "front", "col": 1, "width": 148, "type": "frontend", "label": "ลงทะเบียน ตรวจสิทธิ", "sublabel": "2.5 min · c=4", "tag": "REG" },
+    { "id": "tri", "lane": "front", "col": 2, "width": 148, "type": "frontend", "label": "คัดกรอง วัดสัญญาณชีพ", "sublabel": "5 min · c=7", "tag": "TRI" },
+    { "id": "doc", "lane": "clinic", "col": 3, "width": 148, "type": "backend", "label": "แพทย์ตรวจ", "sublabel": "10 min · c=14", "tag": "DOC" },
+    { "id": "lab", "lane": "diag", "col": 2, "width": 148, "type": "database", "label": "Lab · X-ray · EKG", "sublabel": "5 / 10 / 10 min", "tag": "LAB" },
+    { "id": "csh", "lane": "billing", "col": 4, "width": 148, "type": "messagebus", "label": "ชำระเงิน", "sublabel": "2.5 min · c=4", "tag": "CSH" },
+    { "id": "pha", "lane": "billing", "col": 5, "width": 148, "type": "security", "label": "รับยา + คำแนะนำ", "sublabel": "5.8 min · c=7", "tag": "ρ ≈ 84%" },
+    { "id": "home", "lane": "patient", "col": 5, "width": 148, "type": "external", "label": "กลับบ้าน / นัดต่อ", "sublabel": "EXIT" }
+  ],
+  "edges": [
+    { "from": "arrive", "to": "reg", "variant": "emphasis" },
+    { "from": "reg", "to": "tri", "variant": "emphasis" },
+    { "from": "tri", "to": "doc", "variant": "emphasis" },
+    { "from": "tri", "to": "lab", "label": "ตรวจก่อนพบแพทย์", "role": "branch" },
+    { "from": "doc", "to": "lab", "label": "ส่งตรวจ", "role": "branch" },
+    { "from": "lab", "to": "doc", "label": "ผลตรวจ", "variant": "dashed", "role": "return" },
+    { "from": "doc", "to": "csh", "label": "สั่งยา", "variant": "emphasis" },
+    { "from": "csh", "to": "pha", "variant": "emphasis" },
+    { "from": "pha", "to": "home", "label": "เสร็จสิ้น", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "slate", "title": "3 เส้นทางในแผนภาพนี้", "items": ["ตรวจโรคทั่วไป: ลงทะเบียน → คัดกรอง → แพทย์ → การเงิน → ห้องยา", "ตรวจโรค + เอกซเรย์: แพทย์ → X-ray → กลับมาพบแพทย์ครั้งที่ 2 เพื่อฟังผล", "ตรวจก่อนพบแพทย์: ตรวจเลือด / ตรวจสุขภาพ = คัดกรอง → Lab (→ X-ray → EKG) → แพทย์"] },
+    { "dot": "orange", "title": "ห้องยา (PHA) ภาระสูงสุด", "items": ["ก่อน: 6 slot × 6.5 นาที รองรับ 55 ราย/ชม. < ความต้องการ 61", "หลัง: 7 slot + pre-packing 5.8 นาที → 72 ราย/ชม., ρ ≈ 84%", "ยังเป็นหน่วยที่ภาระสูงสุด ควรเฝ้าระวังช่วงพีค"] },
+    { "dot": "cyan", "title": "นอกแผนภาพนี้", "items": ["ทำแผล วัคซีน ทันตกรรม กายภาพ → “OPD เฉพาะทาง”", "ผ่าตัดวันเดียวกลับ / Admit จาก OPD → “ผ่าตัด / Admit”", "ฉุกเฉิน → “ฉุกเฉิน → ผ่าตัด / ผู้ป่วยใน”"] }
+  ]
+}

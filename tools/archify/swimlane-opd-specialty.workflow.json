@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "บริการเฉพาะทาง: ทำแผล ฉีดยา วัคซีน ทันตกรรม และกายภาพบำบัด",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "external": {
+          "label": "ผู้ป่วยเข้า-ออก"
+        },
+        "frontend": {
+          "label": "เวชระเบียน / คัดกรอง"
+        },
+        "backend": {
+          "label": "บริการทางการแพทย์"
+        },
+        "security": {
+          "label": "จุดคอขวด / ตัดสินใจ"
+        },
+        "messagebus": {
+          "label": "การเงิน & ยา"
+        }
+      }
+    }
+  },
+  "lanes": [
+    { "id": "patient", "label": "ผู้ป่วย" },
+    { "id": "front", "label": "เวชระเบียน & คัดกรอง" },
+    { "id": "clinic", "label": "แพทย์ OPD" },
+    { "id": "spec", "label": "หน่วยบริการเฉพาะทาง" },
+    { "id": "billing", "label": "การเงิน & เภสัชกรรม" }
+  ],
+  "mainPath": [
+    "arrive",
+    "reg",
+    "tri",
+    "doc",
+    "prc",
+    "csh",
+    "home"
+  ],
+  "nodes": [
+    { "id": "arrive", "lane": "patient", "col": 0, "width": 148, "type": "external", "label": "มาถึงโรงพยาบาล", "sublabel": "MAIN ENTRANCE" },
+    { "id": "reg", "lane": "front", "col": 1, "width": 148, "type": "frontend", "label": "ลงทะเบียน ตรวจสิทธิ", "sublabel": "2.5 min · c=4", "tag": "REG" },
+    { "id": "tri", "lane": "front", "col": 2, "width": 148, "type": "frontend", "label": "คัดกรอง วัดสัญญาณชีพ", "sublabel": "5 min · c=7", "tag": "TRI" },
+    { "id": "doc", "lane": "clinic", "col": 2, "width": 148, "type": "backend", "label": "แพทย์ตรวจ", "sublabel": "10 min · c=14", "tag": "DOC" },
+    { "id": "den", "lane": "spec", "col": 1, "width": 148, "type": "backend", "label": "ทันตกรรม", "sublabel": "30 min · c=3", "tag": "DEN" },
+    { "id": "pt", "lane": "spec", "col": 3, "width": 148, "type": "backend", "label": "กายภาพบำบัด", "sublabel": "40 min · c=4", "tag": "PT" },
+    { "id": "prc", "lane": "spec", "col": 4, "width": 148, "type": "security", "label": "หัตถการ · วัคซีน", "sublabel": "8 min · c=2", "tag": "ρ ≈ 67%" },
+    { "id": "csh", "lane": "billing", "col": 5, "width": 148, "type": "messagebus", "label": "ชำระเงิน · รับยา", "sublabel": "CSH · PHA", "tag": "CSH" },
+    { "id": "home", "lane": "patient", "col": 5, "width": 148, "type": "external", "label": "กลับบ้าน / นัดต่อ", "sublabel": "EXIT" }
+  ],
+  "edges": [
+    { "from": "arrive", "to": "reg", "variant": "emphasis" },
+    { "from": "reg", "to": "tri", "variant": "emphasis" },
+    { "from": "reg", "to": "den", "label": "ทันตกรรม", "role": "branch" },
+    { "from": "reg", "to": "doc", "label": "กายภาพ", "role": "branch" },
+    { "from": "tri", "to": "doc", "variant": "emphasis" },
+    { "from": "tri", "to": "prc", "label": "วัคซีน", "role": "branch" },
+    { "from": "doc", "to": "prc", "label": "หัตถการ", "variant": "emphasis" },
+    { "from": "doc", "to": "pt", "role": "branch" },
+    { "from": "prc", "to": "csh", "variant": "emphasis" },
+    { "from": "pt", "to": "csh" },
+    { "from": "den", "to": "csh" },
+    { "from": "csh", "to": "home", "label": "เสร็จสิ้น", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "slate", "title": "4 เส้นทางลัด", "items": ["ทันตกรรม: ลงทะเบียน → ทันตกรรม → การเงิน → ห้องยา (60 นาที)", "กายภาพ: ลงทะเบียน → แพทย์ → กายภาพ → การเงิน (63 นาที, ไม่ผ่านคัดกรอง)", "วัคซีน: ลงทะเบียน → คัดกรอง → หัตถการ → การเงิน (28 นาที, ไม่พบแพทย์)", "ทำแผล/ฉีดยา: คัดกรอง → แพทย์ → หัตถการ → การเงิน → ห้องยา (48 นาที)"] },
+    { "dot": "orange", "title": "ห้องหัตถการ (PRC)", "items": ["รับทั้งวัคซีนและทำแผล 10 ราย/ชม. ด้วย 2 slot → ρ ≈ 67%", "ช่วงแคมเปญวัคซีน ภาระเพิ่มหลายเท่า → แยกเตียงวัคซีนออกจากทำแผล", "ทันตกรรมรอนานสุดในกลุ่มนี้ (≈ 13 นาที)"] },
+    { "dot": "cyan", "title": "การเงินและยา", "items": ["กล่องสุดท้ายรวมการเงิน (CSH) และห้องยา (PHA)", "วัคซีนและกายภาพจ่ายเงินแล้วกลับบ้าน ไม่ต้องรับยา", "ตัวเลขเป็นค่าที่ load 100% โปรไฟล์วันทำการปกติ"] }
+  ]
+}
