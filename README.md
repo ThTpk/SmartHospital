@@ -4,11 +4,13 @@
 
 ## วิธีเปิดใช้งาน
 
+เปิดออนไลน์ได้ที่ <https://thtpk.github.io/SmartHospital/> (GitHub Pages) หรือรันในเครื่อง:
+
 ```bash
 python -m http.server 8765 --directory web
 ```
 
-จากนั้นเปิด <http://localhost:8765> (ไม่ต้องเข้าสู่ระบบ)
+จากนั้นเปิด <http://localhost:8765>
 (ถ้าดับเบิลคลิกเปิด `web/index.html` โดยตรงก็ใช้งานได้ แต่ต้องต่ออินเทอร์เน็ตเพื่อโหลด three.js และฟอนต์)
 
 ## โครงสร้างไฟล์
